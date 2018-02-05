@@ -9,14 +9,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>elastic-5.2.2</artifactId>
-
+    <artifactId>elastic-6.1.x</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>${elasticsearch.6.1.x.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
-            <version>${elasticsearch.5.2.2.version}</version>
+            <version>${elasticsearch.6.1.x.version}</version>
         </dependency>
         <dependency>
             <groupId>io.hybridtheory</groupId>
@@ -24,4 +28,5 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+
 </project>
