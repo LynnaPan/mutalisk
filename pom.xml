@@ -26,6 +26,11 @@
 
         <!-- apache -->
         <apache.httpcomponents.version>4.4.5</apache.httpcomponents.version>
+
+        <!-- web service -->
+        <netty.version>4.1.20.Final</netty.version>
+        <jersey.version>2.26</jersey.version>
+
     </properties>
 
     <dependencyManagement>
@@ -49,9 +54,27 @@
             </dependency>
 
             <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
                 <version>${apache.httpcomponents.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-server</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-netty-http</artifactId>
+                <version>${jersey.version}</version>
             </dependency>
         </dependencies>
 
@@ -62,6 +85,7 @@
         <module>common</module>
         <module>elastic-5.2.2</module>
         <module>elastic-6.1.x</module>
+        <module>web-service</module>
     </modules>
 
 
