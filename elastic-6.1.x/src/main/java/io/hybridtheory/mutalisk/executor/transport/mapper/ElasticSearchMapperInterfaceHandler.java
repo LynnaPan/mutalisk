@@ -2,8 +2,6 @@ package io.hybridtheory.mutalisk.executor.transport.mapper;
 
 
 import io.hybridtheory.mutalisk.common.mapper.annotation.*;
-import io.hybridtheory.mutalisk.common.mapper.annotation.aggregation.ElasticSearchSumAggregation;
-import io.hybridtheory.mutalisk.common.mapper.annotation.filter.ElasticSearchTermFilter;
 import io.hybridtheory.mutalisk.executor.transport.ElasticTransportExecutor;
 import io.hybridtheory.mutalisk.executor.transport.mapper.template.aggregation.NElasticProxyAggregationTemplate;
 import io.hybridtheory.mutalisk.executor.transport.mapper.template.aggregation.NElasticProxySumAggTemplate;

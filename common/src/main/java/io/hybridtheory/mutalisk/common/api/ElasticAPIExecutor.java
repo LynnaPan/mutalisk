@@ -1,14 +1,14 @@
 package io.hybridtheory.mutalisk.common.api;
 
-import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
+import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAPIAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
-import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
+import io.hybridtheory.mutalisk.common.api.filter.ElasticAPIFilter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public interface ElasticExecutor {
+public interface ElasticAPIExecutor {
 
     // create action
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/5.2/java-admin-indices.html
@@ -74,11 +74,11 @@ public interface ElasticExecutor {
 
     public <T> boolean bulkInsert(List<T> objects) throws ExecutionException, InterruptedException;
 
-    public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters);
+    public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticAPIFilter> filters);
 
-    public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters);
+    public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticAPIFilter[] filters);
 
     public <T extends Object> Map<String, Object> aggregate(Class<T[]> arrayClz,
-                                                            List<ElasticFilter> filters,
-                                                            List<ElasticAggregate> aggregates);
+                                                            List<ElasticAPIFilter> filters,
+                                                            List<ElasticAPIAggregate> aggregates);
 }
