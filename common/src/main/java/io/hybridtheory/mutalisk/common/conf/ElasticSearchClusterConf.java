@@ -8,6 +8,7 @@ import java.util.List;
  * Created by kevinlynna on 21/01/2018.
  */
 public class ElasticSearchClusterConf {
+    public String cluster;
     public HttpHost[] hostPorts;
 
     public ElasticSearchClusterConf() {}
