@@ -1,9 +1,7 @@
 package io.hybridtheory.mutalisk.mapper.template.dao;
 
-import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.executor.ElasticExecutor;
 import io.hybridtheory.mutalisk.mapper.ElasticSearchMapperTemplate;
-import io.hybridtheory.mutalisk.executor.highlevel.ElasticHighLevelExecutor;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;

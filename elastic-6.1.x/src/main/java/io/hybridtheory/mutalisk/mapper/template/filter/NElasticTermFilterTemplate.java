@@ -1,8 +1,6 @@
 package io.hybridtheory.mutalisk.mapper.template.filter;
 
 import io.hybridtheory.mutalisk.filter.ElasticFilter;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 
 public class NElasticTermFilterTemplate implements NElasticFilterTemplate {
     public String key;

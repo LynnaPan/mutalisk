@@ -3,8 +3,6 @@ package io.hybridtheory.mutalisk.mapper.template.aggregate;
 
 import io.hybridtheory.mutalisk.aggregate.ElasticAggregate;
 import org.elasticsearch.search.aggregations.Aggregation;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 
 public class NElasticProxySumAggTemplate implements NElasticAggregateTemplate {
@@ -23,11 +21,11 @@ public class NElasticProxySumAggTemplate implements NElasticAggregateTemplate {
 
     @Override
     public ElasticAggregate apply(Object[] args) {
-       return null;
+        return null;
     }
 
     @Override
     public Object value(Aggregation aggregation) {
-        return ((Sum)aggregation).getValue();
+        return ((Sum) aggregation).getValue();
     }
 }

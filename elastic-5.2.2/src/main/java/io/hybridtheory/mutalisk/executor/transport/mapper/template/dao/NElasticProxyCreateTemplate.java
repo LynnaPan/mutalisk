@@ -23,7 +23,7 @@ public class NElasticProxyCreateTemplate implements ElasticSearchMapperTemplate 
 
         try {
             executor.client().admin().indices().prepareCreate(schema.index).addMapping(schema.type,
-                schema.toTypeMapping()).get();
+                    schema.toTypeMapping()).get();
         } catch (Throwable t) {
             return false;
         }

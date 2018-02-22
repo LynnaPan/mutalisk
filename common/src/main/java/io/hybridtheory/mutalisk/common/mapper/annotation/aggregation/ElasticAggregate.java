@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ElasticAggregate {
     String name();
+
     String key();
+
     ElasticAggregateType type();
 }

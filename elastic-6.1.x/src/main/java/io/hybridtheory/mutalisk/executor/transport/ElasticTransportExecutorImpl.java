@@ -1,11 +1,10 @@
 package io.hybridtheory.mutalisk.executor.transport;
 
 
-import com.google.gson.JsonObject;
+import io.hybridtheory.mutalisk.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
 import io.hybridtheory.mutalisk.executor.ElasticExecutorImpl;
-import io.hybridtheory.mutalisk.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.executor.exception.BulkDeleteException;
 import io.hybridtheory.mutalisk.executor.util.RequestHelper;
 import io.hybridtheory.mutalisk.filter.ElasticFilter;
@@ -31,16 +30,14 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
-    ElasticTransportExecutor executor;
-
     private static final Logger log = LoggerFactory.getLogger(ElasticTransportExecutorImpl.class);
+    ElasticTransportExecutor executor;
 
     public ElasticTransportExecutorImpl(ElasticTransportExecutor executor) {
         this.executor = executor;
@@ -69,7 +66,7 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
 
         try {
             CreateIndexRequestBuilder builder = this.executor.client().admin().indices()
-                .prepareCreate(index).addMapping(type, mappingSource);
+                    .prepareCreate(index).addMapping(type, mappingSource);
 
             CreateIndexResponse response;
             if (timeout != null) {
@@ -132,7 +129,7 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
 
     public long countIndex(String index, String type) {
         SearchResponse response = this.executor.client().prepareSearch(index).setTypes(type)
-            .setSize(0).setRequestCache(false).get();
+                .setSize(0).setRequestCache(false).get();
 
         return response.getHits().getTotalHits();
     }
@@ -145,7 +142,7 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
 
     public boolean clearIndexType(String index, String type) throws BulkDeleteException {
         BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(this.executor.client())
-            .source(index).get();
+                .source(index).get();
 
         if (response.getBulkFailures().size() > 0) {
             throw new BulkDeleteException(response.getBulkFailures());
@@ -158,11 +155,12 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
     public boolean insertById(Object object, String id) {
         return insertById(object, id, null);
     }
+
     public boolean insertById(Object object, String id, TimeValue timeout) {
         IndexRequest indexRequest = RequestHelper.buildIdIndexRequest(object, id);
 
         IndexResponse response;
-        if (timeout != null ) {
+        if (timeout != null) {
             response = this.executor.client().index(indexRequest).actionGet(timeout);
         } else {
             response = this.executor.client().index(indexRequest).actionGet();
@@ -181,7 +179,7 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
         IndexRequest indexRequest = new IndexRequest(index, type, id).source(source);
 
         IndexResponse response;
-        if (timeout != null ) {
+        if (timeout != null) {
             response = this.executor.client().index(indexRequest).actionGet(timeout);
         } else {
             response = this.executor.client().index(indexRequest).actionGet();
@@ -193,11 +191,12 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
     public boolean insertByNoId(Object object) {
         return insertByNoId(object, null);
     }
+
     public boolean insertByNoId(Object object, TimeValue timeout) {
         IndexRequest indexRequest = RequestHelper.buildNoIdIndexRequest(object);
 
         IndexResponse response;
-        if (timeout != null ) {
+        if (timeout != null) {
             response = this.executor.client().index(indexRequest).actionGet(timeout);
         } else {
             response = this.executor.client().index(indexRequest).actionGet();
@@ -215,7 +214,7 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
         IndexRequest indexRequest = RequestHelper.buildIndexRequest(object);
 
         IndexResponse response;
-        if (timeout != null ) {
+        if (timeout != null) {
             response = this.executor.client().index(indexRequest).actionGet(timeout);
         } else {
             response = this.executor.client().index(indexRequest).actionGet();
@@ -229,8 +228,8 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
         DeleteResponse response = this.executor.client().prepareDelete()
-            .setIndex(schema.index).setType(schema.type).setId(id)
-            .get();
+                .setIndex(schema.index).setType(schema.type).setId(id)
+                .get();
 
         return response.status().equals(RestStatus.ACCEPTED);
     }
@@ -240,8 +239,8 @@ class ElasticTransportExecutorImpl implements ElasticExecutorImpl {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
         GetResponse response = this.executor.client().prepareGet()
-            .setIndex(schema.index).setType(schema.type).setId(id)
-            .get();
+                .setIndex(schema.index).setType(schema.type).setId(id)
+                .get();
 
         if (response.isExists()) {
             return StorageUtil.gson.fromJson(response.getSourceAsString(), clz);

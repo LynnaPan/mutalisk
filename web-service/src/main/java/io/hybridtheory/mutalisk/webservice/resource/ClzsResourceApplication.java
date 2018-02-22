@@ -9,7 +9,7 @@ import java.util.Set;
 public class ClzsResourceApplication extends Application {
     private Set<Class<?>> clzs = new HashSet<>();
 
-    public ClzsResourceApplication(Class<?>... clxs ) {
+    public ClzsResourceApplication(Class<?>... clxs) {
         Collections.addAll(clzs, clxs);
     }
 

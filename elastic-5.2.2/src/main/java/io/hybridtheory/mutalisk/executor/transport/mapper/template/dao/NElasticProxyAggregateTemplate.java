@@ -31,7 +31,7 @@ public class NElasticProxyAggregateTemplate implements ElasticSearchMapperTempla
         this.filters = filters;
         this.aggregations = aggregations;
 
-        for(NElasticProxyAggregationTemplate template : aggregations) {
+        for (NElasticProxyAggregationTemplate template : aggregations) {
             aggregationMap.put(template.name(), template);
         }
     }
@@ -56,7 +56,7 @@ public class NElasticProxyAggregateTemplate implements ElasticSearchMapperTempla
 
         Map<String, Object> results = new HashMap<>();
 
-        for (Map.Entry<String, Aggregation> entry: aggregations.asMap().entrySet()) {
+        for (Map.Entry<String, Aggregation> entry : aggregations.asMap().entrySet()) {
             NElasticProxyAggregationTemplate xtempl = aggregationMap.get(entry.getValue().getName());
             results.put(entry.getKey(), xtempl.value(entry.getValue()));
         }

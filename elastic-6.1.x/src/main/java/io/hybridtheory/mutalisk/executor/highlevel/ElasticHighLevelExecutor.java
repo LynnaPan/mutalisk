@@ -7,6 +7,7 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.io.IOException;
+
 public class ElasticHighLevelExecutor implements ElasticExecutor {
     private ElasticClientConf conf;
     private RestHighLevelClient client;
@@ -29,7 +30,7 @@ public class ElasticHighLevelExecutor implements ElasticExecutor {
          */
 
         client = new RestHighLevelClient(
-            RestClient.builder(conf.hostPorts));
+                RestClient.builder(conf.hostPorts));
 
 
         System.out.println("Transport Client init done");

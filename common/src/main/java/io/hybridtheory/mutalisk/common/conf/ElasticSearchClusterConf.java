@@ -11,12 +11,13 @@ public class ElasticSearchClusterConf {
     public String cluster;
     public HttpHost[] hostPorts;
 
-    public ElasticSearchClusterConf() {}
+    public ElasticSearchClusterConf() {
+    }
 
     public ElasticSearchClusterConf(List<String> hosts) {
         hostPorts = new HttpHost[hosts.size()];
 
-        for (int i = 0; i < hostPorts.length; i ++) {
+        for (int i = 0; i < hostPorts.length; i++) {
             String[] splits = hosts.get(i).split(":");
             hostPorts[i] = new HttpHost(splits[0], Integer.parseInt(splits[1]));
         }

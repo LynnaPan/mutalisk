@@ -32,7 +32,7 @@ public class ElasticAggregateDAOTemplate implements ElasticSearchMapperTemplate 
         this.filters = filters;
         this.aggregates = aggregates;
 
-        for(NElasticAggregateTemplate template : aggregates) {
+        for (NElasticAggregateTemplate template : aggregates) {
             aggregationMap.put(template.name(), template);
         }
     }

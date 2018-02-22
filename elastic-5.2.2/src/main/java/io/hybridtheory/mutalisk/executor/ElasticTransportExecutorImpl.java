@@ -37,9 +37,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 class ElasticTransportExecutorImpl {
-    ElasticTransportExecutor executor;
-
     private static final Logger log = LoggerFactory.getLogger(ElasticTransportExecutorImpl.class);
+    ElasticTransportExecutor executor;
 
     public ElasticTransportExecutorImpl(ElasticTransportExecutor executor) {
         this.executor = executor;
@@ -68,7 +67,7 @@ class ElasticTransportExecutorImpl {
 
         try {
             CreateIndexRequestBuilder builder = this.executor.client().admin().indices()
-                .prepareCreate(index).addMapping(type, mappingSource);
+                    .prepareCreate(index).addMapping(type, mappingSource);
 
             CreateIndexResponse response;
             if (timeout != null) {
@@ -131,7 +130,7 @@ class ElasticTransportExecutorImpl {
 
     public long countIndex(String index, String type) {
         SearchResponse response = this.executor.client().prepareSearch(index).setTypes(type)
-            .setSize(0).setRequestCache(false).get();
+                .setSize(0).setRequestCache(false).get();
 
         return response.getHits().getTotalHits();
     }
@@ -144,7 +143,7 @@ class ElasticTransportExecutorImpl {
 
     public boolean clearIndexType(String index, String type) throws BulkDeleteException {
         BulkIndexByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(this.executor.client())
-            .source(index).get();
+                .source(index).get();
 
         if (response.getBulkFailures().size() > 0) {
             throw new BulkDeleteException(response.getBulkFailures());
@@ -157,11 +156,12 @@ class ElasticTransportExecutorImpl {
     public boolean insertById(Object object, String id) {
         return insertById(object, id, null);
     }
+
     public boolean insertById(Object object, String id, TimeValue timeout) {
         IndexRequest indexRequest = RequestHelper.buildIdIndexRequest(object, id);
 
         IndexResponse response;
-        if (timeout != null ) {
+        if (timeout != null) {
             response = this.executor.client().index(indexRequest).actionGet(timeout);
         } else {
             response = this.executor.client().index(indexRequest).actionGet();
@@ -173,11 +173,12 @@ class ElasticTransportExecutorImpl {
     public boolean insertByNoId(Object object) {
         return insertByNoId(object, null);
     }
+
     public boolean insertByNoId(Object object, TimeValue timeout) {
         IndexRequest indexRequest = RequestHelper.buildNoIdIndexRequest(object);
 
         IndexResponse response;
-        if (timeout != null ) {
+        if (timeout != null) {
             response = this.executor.client().index(indexRequest).actionGet(timeout);
         } else {
             response = this.executor.client().index(indexRequest).actionGet();
@@ -195,7 +196,7 @@ class ElasticTransportExecutorImpl {
         IndexRequest indexRequest = RequestHelper.buildIndexRequest(object);
 
         IndexResponse response;
-        if (timeout != null ) {
+        if (timeout != null) {
             response = this.executor.client().index(indexRequest).actionGet(timeout);
         } else {
             response = this.executor.client().index(indexRequest).actionGet();
@@ -209,8 +210,8 @@ class ElasticTransportExecutorImpl {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
         DeleteResponse response = this.executor.client().prepareDelete()
-            .setIndex(schema.index).setType(schema.type).setId(id)
-            .get();
+                .setIndex(schema.index).setType(schema.type).setId(id)
+                .get();
 
         return response.status().equals(RestStatus.ACCEPTED);
     }
@@ -220,8 +221,8 @@ class ElasticTransportExecutorImpl {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
         GetResponse response = this.executor.client().prepareGet()
-            .setIndex(schema.index).setType(schema.type).setId(id)
-            .get();
+                .setIndex(schema.index).setType(schema.type).setId(id)
+                .get();
 
         if (response.isExists()) {
             return StorageUtil.gson.fromJson(response.getSourceAsString(), clz);

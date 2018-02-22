@@ -48,7 +48,6 @@ public class ElasticBulkInsertDAOTemplate implements ElasticSearchMapperTemplate
         }
 
 
-
         return executor.impl().bulkInsert(index, mapping, xids, xvalues);
     }
 

@@ -105,11 +105,11 @@ public class ElasticSearchSchema {
             } else if (type == ElasticSearchFieldType.OBJECT) {
                 ElasticSearchProperties subProperties = buildProperties(fclzType, new ElasticSearchProperties());
                 properties.fields.add(
-                    new ElasticSearchComplexField(target, ElasticSearchFieldType.OBJECT, needIndex, subProperties));
+                        new ElasticSearchComplexField(target, ElasticSearchFieldType.OBJECT, needIndex, subProperties));
             } else if (type == ElasticSearchFieldType.NESTED) {
                 ElasticSearchProperties subProperties = buildProperties(fclzType, new ElasticSearchProperties());
                 properties.fields.add(
-                    new ElasticSearchComplexField(target, ElasticSearchFieldType.NESTED, needIndex, subProperties));
+                        new ElasticSearchComplexField(target, ElasticSearchFieldType.NESTED, needIndex, subProperties));
             } else {
                 properties.fields.add(new ElasticSearchField(target, type, true));
             }
@@ -117,10 +117,10 @@ public class ElasticSearchSchema {
 
         Class superClz = clz.getSuperclass();
         if (superClz == null
-            || superClz.equals(Object.class)
-            || superClz.isInterface()
-            || List.class.isAssignableFrom(superClz)
-            || Map.class.isAssignableFrom(superClz)) {
+                || superClz.equals(Object.class)
+                || superClz.isInterface()
+                || List.class.isAssignableFrom(superClz)
+                || Map.class.isAssignableFrom(superClz)) {
             return properties;
         }
         // check up parent

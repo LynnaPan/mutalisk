@@ -74,7 +74,6 @@ public class ElasticSearchMapperInterfaceHandler<T> implements InvocationHandler
     public static int getParameterIndex(Method method, String paramName) {
 
 
-
         Parameter[] parameters = method.getParameters();
 
         for (int i = 0; i < parameters.length; i++) {
@@ -92,7 +91,6 @@ public class ElasticSearchMapperInterfaceHandler<T> implements InvocationHandler
 
     // return -1 if not found
     public static int getDirectlyParameterIndex(Method method, String paramName) {
-
 
 
         Parameter[] parameters = method.getParameters();
@@ -119,7 +117,7 @@ public class ElasticSearchMapperInterfaceHandler<T> implements InvocationHandler
 
             if (createAnno != null) {
                 daoTemplateMap.put(m.getName(),
-                    new NElasticProxyCreateTemplate(createAnno.index(), createAnno.mapping(), createAnno.clz()));
+                        new NElasticProxyCreateTemplate(createAnno.index(), createAnno.mapping(), createAnno.clz()));
                 continue;
             }
 
@@ -128,11 +126,11 @@ public class ElasticSearchMapperInterfaceHandler<T> implements InvocationHandler
                 // parameter number should be one
                 Class clz = m.getParameterTypes()[0];
                 daoTemplateMap.put(m.getName(),
-                    new NElasticProxyInsertTemplate(
-                        insertAnno.index(),
-                        insertAnno.mapping(),
-                        insertAnno.primary(),
-                        clz));
+                        new NElasticProxyInsertTemplate(
+                                insertAnno.index(),
+                                insertAnno.mapping(),
+                                insertAnno.primary(),
+                                clz));
                 continue;
             }
 
@@ -140,11 +138,11 @@ public class ElasticSearchMapperInterfaceHandler<T> implements InvocationHandler
             if (bulkInsertAnno != null) {
                 Class clz = m.getParameterTypes()[0];
                 daoTemplateMap.put(m.getName(),
-                    new NElasticProxyBulkInsertTemplate(
-                        bulkInsertAnno.index(),
-                        bulkInsertAnno.mapping(),
-                        bulkInsertAnno.primary(),
-                        clz));
+                        new NElasticProxyBulkInsertTemplate(
+                                bulkInsertAnno.index(),
+                                bulkInsertAnno.mapping(),
+                                bulkInsertAnno.primary(),
+                                clz));
                 continue;
             }
 
@@ -154,10 +152,10 @@ public class ElasticSearchMapperInterfaceHandler<T> implements InvocationHandler
                 // get term/range annotation
 
                 daoTemplateMap.put(m.getName(), new NElasticProxySearchTemplate(
-                    searchAnno.index(),
-                    searchAnno.mapping(),
-                    buildFilterTemplate(m),
-                    arrayClz
+                        searchAnno.index(),
+                        searchAnno.mapping(),
+                        buildFilterTemplate(m),
+                        arrayClz
                 ));
 
                 continue;
@@ -166,10 +164,10 @@ public class ElasticSearchMapperInterfaceHandler<T> implements InvocationHandler
             ElasticSearchAggregate aggregationAnno = m.getAnnotation(ElasticSearchAggregate.class);
             if (aggregationAnno != null) {
                 daoTemplateMap.put(m.getName(), new NElasticProxyAggregateTemplate(
-                    aggregationAnno.index(),
-                    aggregationAnno.mapping(),
-                    buildFilterTemplate(m),
-                    buildAggregationTemplate(m)
+                        aggregationAnno.index(),
+                        aggregationAnno.mapping(),
+                        buildFilterTemplate(m),
+                        buildAggregationTemplate(m)
                 ));
 
                 continue;

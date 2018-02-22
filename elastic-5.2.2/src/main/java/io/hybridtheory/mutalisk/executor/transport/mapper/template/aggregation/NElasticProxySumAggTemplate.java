@@ -27,6 +27,6 @@ public class NElasticProxySumAggTemplate implements NElasticProxyAggregationTemp
 
     @Override
     public Object value(Aggregation aggregation) {
-        return ((Sum)aggregation).getValue();
+        return ((Sum) aggregation).getValue();
     }
 }

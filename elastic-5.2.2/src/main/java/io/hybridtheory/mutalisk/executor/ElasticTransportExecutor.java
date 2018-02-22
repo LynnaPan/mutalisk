@@ -12,9 +12,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class ElasticTransportExecutor {
+    ElasticTransportExecutorImpl impl;
     private ElasticClientConf conf;
     private TransportClient client;
-    ElasticTransportExecutorImpl impl;
 
     public ElasticTransportExecutor(ElasticClientConf conf) {
         this.conf = conf;
@@ -37,7 +37,7 @@ public class ElasticTransportExecutor {
         for (HttpHost httpHost : conf.hostPorts) {
             try {
                 client.addTransportAddress(
-                    new InetSocketTransportAddress(InetAddress.getByName(httpHost.getHostName()), httpHost.getPort()));
+                        new InetSocketTransportAddress(InetAddress.getByName(httpHost.getHostName()), httpHost.getPort()));
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
@@ -60,6 +60,7 @@ public class ElasticTransportExecutor {
     public ElasticClientConf conf() {
         return conf;
     }
+
     public TransportClient client() {
         return client;
     }

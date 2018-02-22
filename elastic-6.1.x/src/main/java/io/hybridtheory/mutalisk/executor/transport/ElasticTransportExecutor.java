@@ -37,7 +37,7 @@ public class ElasticTransportExecutor {
         for (HttpHost httpHost : conf.hostPorts) {
             try {
                 client.addTransportAddress(
-                    new TransportAddress(InetAddress.getByName(httpHost.getHostName()), httpHost.getPort()));
+                        new TransportAddress(InetAddress.getByName(httpHost.getHostName()), httpHost.getPort()));
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
