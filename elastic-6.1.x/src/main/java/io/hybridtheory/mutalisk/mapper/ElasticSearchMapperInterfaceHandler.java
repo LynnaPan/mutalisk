@@ -158,7 +158,7 @@ public class ElasticSearchMapperInterfaceHandler<T> implements InvocationHandler
                 continue;
             }
 
-            ElasticSearchAggregate aggregationAnno = m.getAnnotation(ElasticSearchAggregate.class);
+            ElasticSearchAggregation aggregationAnno = m.getAnnotation(ElasticSearchAggregation.class);
             if (aggregationAnno != null) {
                 daoTemplateMap.put(m.getName(), new ElasticAggregateDAOTemplate(
                         aggregationAnno.index(),

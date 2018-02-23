@@ -1,14 +1,14 @@
 package io.hybridtheory.mutalisk.common.api;
 
-import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAPIAggregate;
+import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
-import io.hybridtheory.mutalisk.common.api.filter.ElasticAPIFilter;
+import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public interface ElasticAPIExecutor {
+public interface ElasticExecutor {
 
     // create action
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/5.2/java-admin-indices.html
@@ -70,15 +70,19 @@ public interface ElasticAPIExecutor {
     public <T extends Object> T get(Class<T> clz, String id);
 
     // bulkInsert multi values, values may not in same type
+    public <T> boolean bulkInsert(T[] objects, Class<T[]> clz) throws ExecutionException, InterruptedException;
+
+    public <T> boolean bulkInsert(List<T> objects, Class<T[]> clz) throws ExecutionException, InterruptedException;
+
     public <T> boolean bulkInsert(T[] objects) throws ExecutionException, InterruptedException;
 
     public <T> boolean bulkInsert(List<T> objects) throws ExecutionException, InterruptedException;
 
-    public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticAPIFilter> filters);
+    public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters);
 
-    public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticAPIFilter[] filters);
+    public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters);
 
     public <T extends Object> Map<String, Object> aggregate(Class<T[]> arrayClz,
-                                                            List<ElasticAPIFilter> filters,
-                                                            List<ElasticAPIAggregate> aggregates);
+                                                            List<ElasticFilter> filters,
+                                                            List<ElasticAggregate> aggregates);
 }

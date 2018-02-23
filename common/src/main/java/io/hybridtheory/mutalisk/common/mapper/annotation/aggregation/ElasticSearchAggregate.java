@@ -1,4 +1,6 @@
-package io.hybridtheory.mutalisk.common.mapper.annotation;
+package io.hybridtheory.mutalisk.common.mapper.annotation.aggregation;
+
+import io.hybridtheory.mutalisk.common.type.ElasticAggregateType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,7 +10,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ElasticSearchAggregate {
-    String index();
+    String name();
 
-    String mapping() default "data";
+    String key();
+
+    ElasticAggregateType type();
 }

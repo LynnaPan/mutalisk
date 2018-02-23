@@ -5,12 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+// if clz == Object.class, get clz from parameters[0]
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ElasticSearchInsert {
-    String index();
-
-    String mapping() default "data";
-
-    String primary() default "";
+    Class clz() default Object.class;
 }

@@ -8,9 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ElasticSearchBulkInsert {
-    String index();
-
-    String mapping() default "data";
-
-    String primary() default "";
+    Class arrayClz() default Object[].class;
 }
