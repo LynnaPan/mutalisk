@@ -6,10 +6,10 @@ import io.hybridtheory.mutalisk.common.api.aggregate.PlainElasticAggregate;
 import io.hybridtheory.mutalisk.common.mapper.annotation.aggregation.ElasticSearchAggregate;
 import io.hybridtheory.mutalisk.common.mapper.template.ElasticTemplate;
 
-public class PlainElasticAggregateTemplate implements ElasticAggregateTemplate {
+public class ElasticAggregatePlainTemplate implements ElasticAggregateTemplate {
     ElasticSearchAggregate aggregate;
 
-    public PlainElasticAggregateTemplate(ElasticSearchAggregate aggregate) {
+    public ElasticAggregatePlainTemplate(ElasticSearchAggregate aggregate) {
         this.aggregate = aggregate;
     }
 

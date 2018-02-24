@@ -4,8 +4,8 @@ import io.hybridtheory.mutalisk.common.mapper.template.aggregate.ElasticAggregat
 import io.hybridtheory.mutalisk.common.mapper.template.mapping.ElasticA2TMapping;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
-public interface ElasticA2TAggregateMapping extends ElasticA2TMapping {
-    @Override
-    ElasticAggregateTemplate apply(Method method);
+public interface ElasticA2TAggregateMapping {
+    List<ElasticAggregateTemplate> apply(Method method);
 }
