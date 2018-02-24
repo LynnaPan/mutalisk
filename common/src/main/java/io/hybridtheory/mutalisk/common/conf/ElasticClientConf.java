@@ -7,14 +7,14 @@ import java.util.List;
 /**
  * Created by kevinlynna on 21/01/2018.
  */
-public class ElasticSearchClusterConf {
+public class ElasticClientConf {
     public String cluster;
     public HttpHost[] hostPorts;
 
-    public ElasticSearchClusterConf() {
+    public ElasticClientConf() {
     }
 
-    public ElasticSearchClusterConf(List<String> hosts) {
+    public ElasticClientConf(List<String> hosts) {
         hostPorts = new HttpHost[hosts.size()];
 
         for (int i = 0; i < hostPorts.length; i++) {
@@ -23,7 +23,7 @@ public class ElasticSearchClusterConf {
         }
     }
 
-    public ElasticSearchClusterConf(HttpHost[] hostPorts) {
+    public ElasticClientConf(HttpHost[] hostPorts) {
         this.hostPorts = hostPorts;
     }
 }

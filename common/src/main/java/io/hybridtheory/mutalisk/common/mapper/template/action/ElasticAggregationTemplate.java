@@ -15,6 +15,14 @@ public class ElasticAggregationTemplate implements ElasticTemplate {
     public List<ElasticAggregateTemplate> aggregateTemplates;
     public Class arrayClz;
 
+    public ElasticAggregationTemplate(List<ElasticFilterTemplate> filterTemplates,
+                                      List<ElasticAggregateTemplate> aggregateTemplates,
+                                      Class arrayClz) {
+        this.filterTemplates = filterTemplates;
+        this.aggregateTemplates = aggregateTemplates;
+        this.arrayClz = arrayClz;
+    }
+
     @Override
     public Object apply(ElasticExecutor executor, Object[] args) {
         List<ElasticFilter> filters = new ArrayList<>();

@@ -1,12 +1,11 @@
 package io.hybridtheory.mutalisk.executor.conf;
 
 
-import io.hybridtheory.mutalisk.common.conf.ElasticSearchClusterConf;
 import org.apache.http.HttpHost;
 
 import java.util.List;
 
-public class ElasticClientConf extends ElasticSearchClusterConf {
+public class ElasticClientConf extends io.hybridtheory.mutalisk.common.conf.ElasticClientConf {
     public ElasticClientConf() {
     }
 

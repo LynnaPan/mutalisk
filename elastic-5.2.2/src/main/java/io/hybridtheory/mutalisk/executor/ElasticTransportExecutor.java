@@ -1,67 +1,178 @@
 package io.hybridtheory.mutalisk.executor;
 
+import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
+import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
+import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
+import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
 
-import io.hybridtheory.mutalisk.executor.conf.ElasticClientConf;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+public class ElasticTransportExecutor implements ElasticExecutor {
 
-public class ElasticTransportExecutor {
-    ElasticTransportExecutorImpl impl;
-    private ElasticClientConf conf;
-    private TransportClient client;
-
-    public ElasticTransportExecutor(ElasticClientConf conf) {
-        this.conf = conf;
+    @Override
+    public boolean createIndex(Class clz) {
+        return false;
     }
 
-    public void connect() {
-
-        if (client != null) {
-            return;
-        }
-        /*
-            Settings settings = Settings.builder()
-                .put("cluster.name", "myClusterName").build();
-                TransportClient client = new PreBuiltTransportClient(settings);
-                //Add transport addresses and do something with the client...
-         */
-
-        client = new PreBuiltTransportClient(Settings.EMPTY);
-
-        for (HttpHost httpHost : conf.hostPorts) {
-            try {
-                client.addTransportAddress(
-                        new InetSocketTransportAddress(InetAddress.getByName(httpHost.getHostName()), httpHost.getPort()));
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
-        }
-
-        System.out.println("Transport Client init done");
-
-        impl = new ElasticTransportExecutorImpl(this);
+    @Override
+    public boolean createIndex(Class clz, long timeout) {
+        return false;
     }
 
-    public synchronized void close() {
-        if (client != null) {
-
-            client.close();
-        }
-
-        client = null;
+    @Override
+    public boolean createIndex(String index, String type, String mappingSource) {
+        return false;
     }
 
-    public ElasticClientConf conf() {
-        return conf;
+    @Override
+    public boolean createIndex(String index, String type, String mappingSource, long timeout) {
+        return false;
     }
 
-    public TransportClient client() {
-        return client;
+    @Override
+    public boolean deleteIndex(Class clz) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteIndex(String index) {
+        return false;
+    }
+
+    @Override
+    public boolean existedIndex(Class clz) {
+        return false;
+    }
+
+    @Override
+    public boolean existedIndex(String index) {
+        return false;
+    }
+
+    @Override
+    public long countIndex(Class clz) {
+        return 0;
+    }
+
+    @Override
+    public long countIndex(String index, String type) {
+        return 0;
+    }
+
+    @Override
+    public boolean clearIndexType(Class clz) throws BulkDeleteException {
+        return false;
+    }
+
+    @Override
+    public boolean clearIndexType(String index, String type) throws BulkDeleteException {
+        return false;
+    }
+
+    @Override
+    public boolean insertById(Object object, String id) {
+        return false;
+    }
+
+    @Override
+    public boolean insertById(Object object, String id, long timeout) {
+        return false;
+    }
+
+    @Override
+    public boolean insertById(Object object, Class clz, String id) {
+        return false;
+    }
+
+    @Override
+    public boolean insertById(Object object, Class clz, String id, long timeout) {
+        return false;
+    }
+
+    @Override
+    public boolean insertByNoId(Object object) {
+        return false;
+    }
+
+    @Override
+    public boolean insertByNoId(Object object, long timeout) {
+        return false;
+    }
+
+    @Override
+    public boolean insertByNoId(Object object, Class clz) {
+        return false;
+    }
+
+    @Override
+    public boolean insertByNoId(Object object, Class clz, long timeout) {
+        return false;
+    }
+
+    @Override
+    public boolean insert(Object object) throws ExecutionException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public boolean insert(Object object, long timeout) throws ExecutionException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public boolean insert(Object object, Class clz) throws ExecutionException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public boolean insert(Object object, Class clz, long timeout) throws ExecutionException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public boolean delete(Class clz, String id) {
+        return false;
+    }
+
+    @Override
+    public <T> T get(Class<T> clz, String id) {
+        return null;
+    }
+
+    @Override
+    public <T> boolean bulkInsert(T[] objects, Class<T[]> clz) throws ExecutionException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public <T> boolean bulkInsert(List<T> objects, Class<T[]> clz) throws ExecutionException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public <T> boolean bulkInsert(T[] objects) throws ExecutionException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public <T> boolean bulkInsert(List<T> objects) throws ExecutionException, InterruptedException {
+        return false;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters) {
+        return null;
+    }
+
+    @Override
+    public <T> Map<String, Object> aggregate(Class<T[]> arrayClz, List<ElasticFilter> filters, List<ElasticAggregate> aggregates) {
+        return null;
     }
 }

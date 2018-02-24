@@ -24,4 +24,16 @@ public class ElasticA2TPipelineMapping implements ElasticA2TMapping {
         return null;
     }
 
+    private static final ElasticA2TPipelineMapping actionMappings =
+            new ElasticA2TPipelineMapping(new ElasticA2TMapping[]{
+                    new ElasticA2TCreateMapping(),
+                    new ElasticA2TInsertMapping(),
+                    new ElasticA2TBulkInsertMapping(),
+                    new ElasticA2TSearchMapping(),
+                    new ElasticA2TAggregationMapping()
+            });
+
+    public static final ElasticA2TPipelineMapping getActionMappings() {
+        return actionMappings;
+    }
 }

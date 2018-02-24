@@ -1,7 +1,7 @@
 package io.hybridtheory.mutalisk.common.mapper.template;
 
 import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
-import io.hybridtheory.mutalisk.common.mapper.annotation.ElasticSearchCreate;
+import io.hybridtheory.mutalisk.common.mapper.template.mapping.ElasticA2TPipelineMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,14 @@ public class ElasticMapperInterfaceHandler<T> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        return null;
+        String methodName = method.getName();
+
+        if (daoTemplateMap.containsKey(methodName)) {
+            return daoTemplateMap.get(methodName).apply(executor, args);
+        }
+
+        throw new UnsupportedOperationException("Unsupported method: " + methodName);
+
     }
 
     // --- help functions
@@ -47,7 +54,11 @@ public class ElasticMapperInterfaceHandler<T> implements InvocationHandler {
         // - aggregation action
         // - other will report error
         for (Method m : clz.getDeclaredMethods()) {
+            ElasticTemplate template = ElasticA2TPipelineMapping.getActionMappings().apply(m);
 
+            if (template != null) {
+                daoTemplateMap.put(m.getName(), template);
+            }
         }
     }
 }

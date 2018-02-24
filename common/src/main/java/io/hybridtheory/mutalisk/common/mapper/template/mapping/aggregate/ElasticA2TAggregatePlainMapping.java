@@ -31,4 +31,10 @@ public class ElasticA2TAggregatePlainMapping implements ElasticA2TAggregateMappi
 
         return list;
     }
+
+    private static final ElasticA2TAggregatePlainMapping instance = new ElasticA2TAggregatePlainMapping();
+
+    public static ElasticA2TAggregatePlainMapping instance() {
+        return instance;
+    }
 }

@@ -8,7 +8,7 @@ public class ElasticA2TFactory {
             new ElasticA2TCreateMapping(),
             new ElasticA2TInsertMapping(),
             new ElasticA2TBulkInsertMapping(),
-            new ElasticA2TSeachMapping(),
+            new ElasticA2TSearchMapping(),
             new ElasticA2TAggregationMapping()
     };
 

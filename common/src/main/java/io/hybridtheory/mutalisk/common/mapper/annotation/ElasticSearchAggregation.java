@@ -8,6 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ElasticSearchAggregation {
-    String index();
-    String mapping() default "data";
+    Class clz();
 }
