@@ -20,6 +20,18 @@ public class RequestHelper {
         return new IndexRequest(schema.index, schema.type).source(StorageUtil.gson.toJson(object));
     }
 
+    public static IndexRequest buildNoIdIndexRequest(Class clz, Object object) {
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        return new IndexRequest(schema.index, schema.type).source(StorageUtil.gson.toJson(object));
+    }
+
+    public static IndexRequest buildIdIndexRequest(Class clz, Object object, String id) {
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        return new IndexRequest(schema.index, schema.type, id).source(StorageUtil.gson.toJson(object));
+    }
+
     public static IndexRequest buildIdIndexRequest(Object object, String id) {
         Class clz = object.getClass();
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
@@ -29,6 +41,21 @@ public class RequestHelper {
 
     public static IndexRequest buildIndexRequest(Object object) {
         Class clz = object.getClass();
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        if (schema.id.length == 0) {
+            return new IndexRequest(schema.index, schema.type).source(StorageUtil.gson.toJson(object));
+        }
+
+        // need to read id from object
+        JsonObject jobj = (JsonObject) StorageUtil.gson.toJsonTree(object);
+        IndexRequest request = new IndexRequest(schema.index, schema.type, schema.getId(jobj));
+        request.source(jobj.toString());
+
+        return request;
+    }
+
+    public static IndexRequest buildIndexRequest(Class clz, Object object) {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
         if (schema.id.length == 0) {

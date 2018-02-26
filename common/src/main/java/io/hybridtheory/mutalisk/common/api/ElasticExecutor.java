@@ -70,9 +70,9 @@ public interface ElasticExecutor {
     public <T extends Object> T get(Class<T> clz, String id);
 
     // bulkInsert multi values, values may not in same type
-    public <T> boolean bulkInsert(T[] objects, Class<T[]> clz) throws ExecutionException, InterruptedException;
+    public <T> boolean bulkInsert(T[] objects, Class<T> clz) throws ExecutionException, InterruptedException;
 
-    public <T> boolean bulkInsert(List<T> objects, Class<T[]> clz) throws ExecutionException, InterruptedException;
+    public <T> boolean bulkInsert(List<T> objects, Class<T> clz) throws ExecutionException, InterruptedException;
 
     public <T> boolean bulkInsert(T[] objects) throws ExecutionException, InterruptedException;
 

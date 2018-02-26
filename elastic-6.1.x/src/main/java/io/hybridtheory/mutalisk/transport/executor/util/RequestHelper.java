@@ -1,17 +1,13 @@
-package io.hybridtheory.mutalisk.executor.util;
+package io.hybridtheory.mutalisk.transport.executor.util;
 
 
 import com.google.gson.JsonObject;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.rest.RestStatus;
-import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
 
 public class RequestHelper {
 
@@ -22,6 +18,18 @@ public class RequestHelper {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
         return new IndexRequest(schema.index, schema.type).source(StorageUtil.gson.toJson(object));
+    }
+
+    public static IndexRequest buildNoIdIndexRequest(Class clz, Object object) {
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        return new IndexRequest(schema.index, schema.type).source(StorageUtil.gson.toJson(object));
+    }
+
+    public static IndexRequest buildIdIndexRequest(Class clz, Object object, String id) {
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        return new IndexRequest(schema.index, schema.type, id).source(StorageUtil.gson.toJson(object));
     }
 
     public static IndexRequest buildIdIndexRequest(Object object, String id) {
@@ -47,23 +55,22 @@ public class RequestHelper {
         return request;
     }
 
-    public static boolean assertCreatedOrUpdated(RestStatus status) {
-        return status == RestStatus.CREATED || status == RestStatus.OK;
-    }
+    public static IndexRequest buildIndexRequest(Class clz, Object object) {
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
-
-    // handle search response
-    public static <T extends Object> T[] handleSearchResponse(SearchResponse response, Class<T[]> arrayClz) {
-        Class clz = arrayClz.getComponentType();
-
-        SearchHits hits = response.getHits();
-
-        Object[] results = new Object[hits.getHits().length];
-
-        for (int i = 0; i < results.length; i++) {
-            results[i] = StorageUtil.gson.fromJson(hits.getAt(i).getSourceAsString(), clz);
+        if (schema.id.length == 0) {
+            return new IndexRequest(schema.index, schema.type).source(StorageUtil.gson.toJson(object));
         }
 
-        return Arrays.copyOf(results, results.length, arrayClz);
+        // need to read id from object
+        JsonObject jobj = (JsonObject) StorageUtil.gson.toJsonTree(object);
+        IndexRequest request = new IndexRequest(schema.index, schema.type, schema.getId(jobj));
+        request.source(jobj.toString());
+
+        return request;
+    }
+
+    public static boolean assertCreatedOrUpdated(RestStatus status) {
+        return status == RestStatus.CREATED || status == RestStatus.OK;
     }
 }

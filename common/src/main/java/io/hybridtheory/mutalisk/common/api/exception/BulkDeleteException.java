@@ -4,9 +4,9 @@ package io.hybridtheory.mutalisk.common.api.exception;
 import java.util.List;
 
 public class BulkDeleteException extends Exception {
-    List<Object> failures;
+    List<?> failures;
 
-    public BulkDeleteException(List<Object> failures) {
+    public BulkDeleteException(List<?> failures) {
         this.failures = failures;
     }
 }

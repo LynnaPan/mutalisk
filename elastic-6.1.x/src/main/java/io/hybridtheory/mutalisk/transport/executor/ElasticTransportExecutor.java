@@ -1,4 +1,4 @@
-package io.hybridtheory.mutalisk.executor;
+package io.hybridtheory.mutalisk.transport.executor;
 
 import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
 import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
@@ -6,9 +6,9 @@ import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
 import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
-import io.hybridtheory.mutalisk.executor.aggregation.ElasticAggregateParser;
-import io.hybridtheory.mutalisk.executor.filter.ElasticSearchParser;
-import io.hybridtheory.mutalisk.executor.util.RequestHelper;
+import io.hybridtheory.mutalisk.transport.executor.aggregation.ElasticAggregateParser;
+import io.hybridtheory.mutalisk.transport.executor.filter.ElasticSearchParser;
+import io.hybridtheory.mutalisk.transport.executor.util.RequestHelper;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
@@ -24,7 +24,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.reindex.BulkIndexByScrollResponse;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHits;
@@ -158,7 +158,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
     @Override
     public boolean clearIndexType(String index, String type) throws BulkDeleteException {
-        BulkIndexByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(this.client)
+        BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(this.client)
             .source(index).get();
 
         if (response.getBulkFailures().size() > 0) {
@@ -373,10 +373,10 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
         SearchHits hits = this.client.search(request).actionGet().getHits();
 
-        Object[] results = new Object[hits.hits().length];
+        Object[] results = new Object[hits.getHits().length];
 
         for (int i = 0; i < results.length; i++) {
-            results[i] = StorageUtil.gson.fromJson(hits.getAt(i).sourceAsString(), clz);
+            results[i] = StorageUtil.gson.fromJson(hits.getAt(i).getSourceAsString(), clz);
         }
 
         return Arrays.copyOf(results, results.length, arrayClz);
