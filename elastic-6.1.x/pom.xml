@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>elastic-6.1.x</artifactId>
+    <artifactId>mutalisk-elastic-6.1.x</artifactId>
 
     <dependencies>
         <dependency>

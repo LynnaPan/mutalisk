@@ -4,11 +4,13 @@ import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
 import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
 import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
+import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
 import io.hybridtheory.mutalisk.executor.aggregation.ElasticAggregateParser;
 import io.hybridtheory.mutalisk.executor.filter.ElasticSearchParser;
 import io.hybridtheory.mutalisk.executor.util.RequestHelper;
+import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
@@ -22,6 +24,8 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.reindex.BulkIndexByScrollResponse;
@@ -33,9 +37,11 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregation;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -47,8 +53,18 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
     private TransportClient client;
 
-    public ElasticTransportExecutor(TransportClient client) {
-        this.client = client;
+    public ElasticTransportExecutor(ElasticClientConf conf) {
+        this.client = new PreBuiltTransportClient(Settings.EMPTY);
+
+        for (HttpHost httpHost : conf.hostPorts) {
+            try {
+                client.addTransportAddress(
+                    new InetSocketTransportAddress(
+                        InetAddress.getByName(httpHost.getHostName()), httpHost.getPort()));
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -216,7 +232,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
         IndexRequest indexRequest = RequestHelper.buildNoIdIndexRequest(object);
 
         IndexResponse response;
-        if (timeout != 0){
+        if (timeout != 0) {
             response = this.client.index(indexRequest).actionGet(timeout);
         } else {
             response = this.client.index(indexRequest).actionGet();
@@ -235,7 +251,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
         IndexRequest indexRequest = RequestHelper.buildNoIdIndexRequest(clz, object);
 
         IndexResponse response;
-        if (timeout != 0){
+        if (timeout != 0) {
             response = this.client.index(indexRequest).actionGet(timeout);
         } else {
             response = this.client.index(indexRequest).actionGet();
@@ -403,7 +419,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
             sourceBuilder.query(filter);
         }
 
-        for (AggregationBuilder builder: ElasticAggregateParser.parse(aggregates)) {
+        for (AggregationBuilder builder : ElasticAggregateParser.parse(aggregates)) {
             sourceBuilder.aggregation(builder);
         }
 
@@ -419,7 +435,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
             if (NumericMetricsAggregation.SingleValue.class.isAssignableFrom(agg.getClass())) {
                 // @TODO could use response.getAggregations().get("text").getProperty("value") to replace
                 // results.put(entry.getKey(), entry.getValue().getProperty("value"));
-                results.put(entry.getKey(), ((NumericMetricsAggregation.SingleValue)agg).value());
+                results.put(entry.getKey(), ((NumericMetricsAggregation.SingleValue) agg).value());
             }
         }
 
