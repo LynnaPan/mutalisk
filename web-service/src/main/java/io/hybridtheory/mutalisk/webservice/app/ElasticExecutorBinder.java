@@ -3,6 +3,7 @@ package io.hybridtheory.mutalisk.webservice.app;
 
 import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
+import io.hybridtheory.mutalisk.transport.executor.ElasticTransportExecutor;
 import org.apache.http.HttpHost;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.internal.inject.Bindings;
@@ -19,12 +20,12 @@ public class ElasticExecutorBinder extends AbstractBinder {
             Class<?> clz = Class.forName(ElasticExecutorClzName);
             Constructor constructor = clz.getConstructor(ElasticClientConf.class);
             ElasticClientConf conf = new ElasticClientConf();
-            conf.hostPorts = new HttpHost[] {
+            conf.hostPorts = new HttpHost[]{
                 new HttpHost("localhost", 9300)
             };
             conf.cluster = "mrtang";
 
-            ElasticExecutor executor = (ElasticExecutor) constructor.newInstance(conf);
+            ElasticExecutor executor = new ElasticTransportExecutor(conf);
 
             bind(Bindings.service(executor)).to(ElasticExecutor.class);
         } catch (Throwable t) {

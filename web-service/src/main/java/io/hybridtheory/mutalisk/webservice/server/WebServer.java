@@ -7,6 +7,7 @@ import io.netty.channel.Channel;
 import org.glassfish.jersey.netty.httpserver.NettyHttpContainerProvider;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 public class WebServer {
@@ -19,9 +20,16 @@ public class WebServer {
         this.resourceConfig = resourceConfig.register(new ElasticExecutorBinder());
     }
 
+    public static void main(String[] args) {
+        URI baseUri = UriBuilder.fromUri("http://localhost/").port(6543).build();
+        ResourceConfig resourceConfig = new ElasticApplication();
+        NettyHttpContainerProvider.createServer(baseUri, resourceConfig, true);
+    }
+
     public synchronized Channel doStart() {
         if (server == null) {
             server = NettyHttpContainerProvider.createServer(this.conf.uri, resourceConfig, true);
+            System.out.println(server.localAddress());
         }
 
         return server;
@@ -32,22 +40,6 @@ public class WebServer {
             server.close();
 
             server = null;
-        }
-    }
-
-    public static void main(String[] args) {
-        WebServerConf conf = new WebServerConf(URI.create("http://localhost:9000"));
-        ElasticApplication application = new ElasticApplication();
-
-        new WebServer(conf, application).doStart();
-
-        System.out.println(String.format("Application started. (HTTP/2 enabled!)\nTry out %s%s\nStop the application using "
-            + "CTRL+C.", conf.uri, "elastic"));
-
-        try {
-            Thread.currentThread().join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 }

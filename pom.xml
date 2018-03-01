@@ -60,8 +60,12 @@
                     <id>elastic-lucene-snapshots</id>
                     <name>Elastic Lucene Snapshots</name>
                     <url>http://s3.amazonaws.com/download.elasticsearch.org/lucenesnapshots/00142c9</url>
-                    <releases><enabled>true</enabled></releases>
-                    <snapshots><enabled>false</enabled></snapshots>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
                 </repository>
             </repositories>
         </profile>
@@ -76,7 +80,7 @@
         <scala-lang.version>2.11.8</scala-lang.version>
 
         <!-- Log -->
-        <log4j.version>2.7</log4j.version>
+        <log4j.version>2.10.0</log4j.version>
         <slf4j.version>1.7.25</slf4j.version>
 
         <!-- elasticseaexecutorient -->
@@ -94,11 +98,18 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- log system -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>org.slf4j</groupId>
