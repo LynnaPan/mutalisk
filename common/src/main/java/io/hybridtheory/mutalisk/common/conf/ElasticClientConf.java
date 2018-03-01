@@ -26,4 +26,13 @@ public class ElasticClientConf {
     public ElasticClientConf(HttpHost[] hostPorts) {
         this.hostPorts = hostPorts;
     }
+
+    public ElasticClientConf(List<String> hosts, String type) {
+        hostPorts = new HttpHost[hosts.size()];
+
+        for (int i = 0; i < hostPorts.length; i++) {
+            String[] splits = hosts.get(i).split(":");
+            hostPorts[i] = new HttpHost(splits[0], Integer.parseInt(splits[1]), type);
+        }
+    }
 }

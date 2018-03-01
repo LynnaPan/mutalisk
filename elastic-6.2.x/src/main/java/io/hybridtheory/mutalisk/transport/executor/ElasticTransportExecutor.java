@@ -119,13 +119,12 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
     @Override
     public boolean deleteIndex(String index) {
-        log.info("Delete Index {} ", index);
         try {
             DeleteIndexResponse response = this.client.admin().indices().prepareDelete(index).get();
 
             return response.isAcknowledged();
         } catch (Throwable t) {
-            log.error("Failed to delete Index", t);
+            log.error("Delete to createIndex", t);
             return false;
         }
     }

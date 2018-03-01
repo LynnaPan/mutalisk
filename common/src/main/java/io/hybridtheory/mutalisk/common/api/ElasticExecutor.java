@@ -4,11 +4,12 @@ import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
 import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public interface ElasticExecutor {
+public interface ElasticExecutor extends Closeable{
 
     // create action
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/5.2/java-admin-indices.html
@@ -85,4 +86,5 @@ public interface ElasticExecutor {
     public <T extends Object> Map<String, Object> aggregate(Class<T[]> arrayClz,
                                                             List<ElasticFilter> filters,
                                                             List<ElasticAggregate> aggregates);
+
 }

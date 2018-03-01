@@ -1,11 +1,14 @@
 package io.hybridtheory.mutalisk.common;
 
+import io.hybridtheory.mutalisk.common.schema.annotation.ElasticSearchMeta;
+
 import java.util.Date;
 import java.util.List;
 
 /**
  * Created by lynna on 2018/2/22.
  */
+@ElasticSearchMeta(index = "Production")
 public class Production {
     public int uuid;
     public String brand;
