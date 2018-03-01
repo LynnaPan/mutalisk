@@ -55,6 +55,8 @@ public class ElasticTransportExecutor implements ElasticExecutor {
     private TransportClient client;
 
     public ElasticTransportExecutor(ElasticClientConf conf) {
+        System.setProperty("es.set.netty.runtime.available.processors", "false");
+
          this.client = new PreBuiltTransportClient(Settings.EMPTY);
 
         for (HttpHost httpHost : conf.hostPorts) {
