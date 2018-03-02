@@ -41,6 +41,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -127,6 +128,26 @@ public class ElasticTransportExecutor implements ElasticExecutor {
             log.error("Delete to createIndex", t);
             return false;
         }
+    }
+
+    @Override
+    public boolean openIndex(String index) {
+        return false;
+    }
+
+    @Override
+    public boolean openIndex(Class clz) {
+        return false;
+    }
+
+    @Override
+    public boolean closeIndex(String index) {
+        return false;
+    }
+
+    @Override
+    public boolean closeIndex(Class clz) {
+        return false;
     }
 
     @Override
@@ -440,5 +461,10 @@ public class ElasticTransportExecutor implements ElasticExecutor {
         }
 
         return results;
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }

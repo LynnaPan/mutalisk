@@ -26,6 +26,14 @@ public interface ElasticExecutor extends Closeable{
 
     public boolean deleteIndex(String index);
 
+    boolean openIndex(String index);
+
+    boolean openIndex(Class clz);
+
+    boolean closeIndex(String index);
+
+    boolean closeIndex(Class clz);
+
     public boolean existedIndex(Class clz);
 
     public boolean existedIndex(String index);
