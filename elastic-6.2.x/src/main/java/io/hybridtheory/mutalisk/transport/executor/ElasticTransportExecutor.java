@@ -101,7 +101,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
                 response = builder.get();
             }
 
-            return response.isShardsAcked();
+            return response.isShardsAcknowledged();
         } catch (Throwable t) {
             log.error("Unable to createIndex", t);
             return false;
@@ -127,6 +127,26 @@ public class ElasticTransportExecutor implements ElasticExecutor {
             log.error("Delete to createIndex", t);
             return false;
         }
+    }
+
+    @Override
+    public boolean openIndex(String index) {
+        return false;
+    }
+
+    @Override
+    public boolean openIndex(Class clz) {
+        return false;
+    }
+
+    @Override
+    public boolean closeIndex(String index) {
+        return false;
+    }
+
+    @Override
+    public boolean closeIndex(Class clz) {
+        return false;
     }
 
     @Override

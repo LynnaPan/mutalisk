@@ -69,6 +69,26 @@ public class HighLevelExecutor implements ElasticExecutor {
     }
 
     @Override
+    public boolean openIndex(String index) {
+        return false;
+    }
+
+    @Override
+    public boolean openIndex(Class clz) {
+        return false;
+    }
+
+    @Override
+    public boolean closeIndex(String index) {
+        return false;
+    }
+
+    @Override
+    public boolean closeIndex(Class clz) {
+        return false;
+    }
+
+    @Override
     public boolean existedIndex(Class clz) {
         return false;
     }

@@ -24,3 +24,4 @@ public class Production {
     public int stock;
     public long bought;
 }
+

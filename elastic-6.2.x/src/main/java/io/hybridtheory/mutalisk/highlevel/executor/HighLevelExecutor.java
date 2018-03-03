@@ -15,17 +15,24 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.*;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,32 +168,80 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public boolean existedIndex(Class clz) {
-        return false;
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        log.info("Test Existed Index {} for Class {}", schema.index, clz.getName());
+
+        return existedIndex(schema.index);
     }
 
     @Override
     public boolean existedIndex(String index) {
+        try {
+            log.info("Test Existed Index {}", index);
+            Response response = client.getLowLevelClient().performRequest("HEAD", index);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if(statusCode == 200) {
+                return true;
+            }
+            else if(statusCode == 404) {
+                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
     @Override
     public long countIndex(Class clz) {
-        return 0;
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+        return countIndex(schema.index, schema.type);
     }
 
     @Override
     public long countIndex(String index, String type) {
+        try {
+        SearchRequest searchRequest = new SearchRequest(index);
+        searchRequest.types(type);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+        searchSourceBuilder.size(0);
+        searchRequest.source(searchSourceBuilder);
+
+        SearchResponse searchResponse = client.search(searchRequest);
+        log.info("Search {} items in index {}.", searchResponse.getHits().getTotalHits(), index);
+
+        return searchResponse.getHits().getTotalHits();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return 0;
     }
 
     @Override
     public boolean clearIndexType(Class clz) throws BulkDeleteException {
-        return false;
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        return clearIndexType(schema.index, schema.type);
     }
 
     @Override
     public boolean clearIndexType(String index, String type) throws BulkDeleteException {
-        return false;
+        BulkByScrollResponse response =
+                DeleteByQueryAction.INSTANCE.newRequestBuilder((ElasticsearchClient) client)
+                        .source(index)
+                        .get();
+
+        long deleted = response.getDeleted();
+        log.info("Delete {} items in index.", deleted, index);
+        if (response.getBulkFailures().size() > 0) {
+            throw new BulkDeleteException(response.getBulkFailures());
+        }
+
+        return true;
     }
 
     @Override
