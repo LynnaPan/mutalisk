@@ -23,7 +23,8 @@ public class ElasticSearchSchema {
     public String index;
     public String type;
     public String[] id;
-    public Map<String, Object> settings = new HashMap<>();
+    public int shards = 5;
+    public int replicas = 2;
     public ElasticSearchProperties properties;
     public Class clz;
 
@@ -49,6 +50,9 @@ public class ElasticSearchSchema {
             schema.index = ei.index();
             schema.type = ei.type();
             schema.id = ei.id();
+
+            schema.shards = ei.shards();
+            schema.replicas = ei.replicas();
         }
 
         if (parseField) {
@@ -177,14 +181,43 @@ public class ElasticSearchSchema {
         }
     }
 
-    public String toTypeMapping() {
+    public JsonObject toIndexCreateJson() {
+        JsonObject wrap = new JsonObject();
+        wrap.add("settings", toIndexSettingJson());
+        wrap.add("mappings", toTypeMappingJson());
+
+        return wrap;
+    }
+
+    public String toIndexCreate() {
+        return toIndexSettingJson().toString();
+    }
+
+    public JsonObject toIndexSettingJson() {
+        JsonObject settings = new JsonObject();
+
+        settings.addProperty("number_of_shards", this.shards);
+        settings.addProperty("number_of_replicas", this.replicas);
+
+        return settings;
+    }
+
+    public String toIndexSetting() {
+        return toIndexSettingJson().toString();
+    }
+
+    public JsonObject toTypeMappingJson() {
         JsonObject mappingContent = new JsonObject();
         JsonObject mappingPro = new JsonObject();
 
         mappingPro.add("properties", this.properties.toJson());
         mappingContent.add(this.type, mappingPro);
 
-        return mappingContent.toString();
+        return mappingContent;
+    }
+
+    public String toTypeMapping() {
+        return toTypeMappingJson().toString();
     }
 
     public String getId(JsonObject jobj) {

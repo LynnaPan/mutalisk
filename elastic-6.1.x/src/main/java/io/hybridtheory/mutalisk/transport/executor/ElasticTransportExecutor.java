@@ -7,9 +7,10 @@ import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
-import io.hybridtheory.mutalisk.transport.executor.aggregation.ElasticAggregateParser;
-import io.hybridtheory.mutalisk.transport.executor.filter.ElasticSearchParser;
+
 import io.hybridtheory.mutalisk.transport.executor.util.RequestHelper;
+import io.hybridtheory.mutalisk.transport.executor.filter.ElasticSearchParser;
+import io.hybridtheory.mutalisk.transport.executor.aggregation.ElasticAggregateParser;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -57,7 +58,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
     public ElasticTransportExecutor(ElasticClientConf conf) {
         System.setProperty("es.set.netty.runtime.available.processors", "false");
 
-         this.client = new PreBuiltTransportClient(Settings.EMPTY);
+        this.client = new PreBuiltTransportClient(Settings.EMPTY);
 
         for (HttpHost httpHost : conf.hostPorts) {
             try {
@@ -80,16 +81,16 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
         log.info("Create Index {}:{} for Class {}", schema.index, schema.type, clz.getName());
 
-        return createIndex(schema.index, schema.type, schema.toTypeMapping(), timeout);
+        return createIndex(schema.index, schema.type, schema.toIndexSetting(), schema.toTypeMapping(), timeout);
     }
 
     @Override
-    public boolean createIndex(String index, String type, String mappingSource) {
-        return createIndex(index, type, mappingSource, 0);
+    public boolean createIndex(String index, String type, String settingSource, String mappingSource) {
+        return createIndex(index, type, settingSource, mappingSource, 0);
     }
 
     @Override
-    public boolean createIndex(String index, String type, String mappingSource, long timeout) {
+    public boolean createIndex(String index, String type, String settingSource, String mappingSource, long timeout) {
         log.info("Create Index {}:{}", index, type);
 
         try {
@@ -255,7 +256,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
         IndexRequest indexRequest = RequestHelper.buildNoIdIndexRequest(object);
 
         IndexResponse response;
-        if (timeout != 0){
+        if (timeout != 0) {
             response = this.client.index(indexRequest).actionGet(timeout);
         } else {
             response = this.client.index(indexRequest).actionGet();
@@ -274,7 +275,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
         IndexRequest indexRequest = RequestHelper.buildNoIdIndexRequest(clz, object);
 
         IndexResponse response;
-        if (timeout != 0){
+        if (timeout != 0) {
             response = this.client.index(indexRequest).actionGet(timeout);
         } else {
             response = this.client.index(indexRequest).actionGet();
@@ -442,7 +443,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
             sourceBuilder.query(filter);
         }
 
-        for (AggregationBuilder builder: ElasticAggregateParser.parse(aggregates)) {
+        for (AggregationBuilder builder : ElasticAggregateParser.parse(aggregates)) {
             sourceBuilder.aggregation(builder);
         }
 
@@ -458,7 +459,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
             if (NumericMetricsAggregation.SingleValue.class.isAssignableFrom(agg.getClass())) {
                 // @TODO could use response.getAggregations().get("text").getProperty("value") to replace
                 // results.put(entry.getKey(), entry.getValue().getProperty("value"));
-                results.put(entry.getKey(), ((NumericMetricsAggregation.SingleValue)agg).value());
+                results.put(entry.getKey(), ((NumericMetricsAggregation.SingleValue) agg).value());
             }
         }
 

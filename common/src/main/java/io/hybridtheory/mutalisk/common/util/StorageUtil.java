@@ -10,8 +10,8 @@ import java.lang.reflect.Type;
 
 public class StorageUtil {
 
-    public static Gson gson = new Gson();
-    public static JsonParser jsonParser = new JsonParser();
+    public final static Gson gson = new Gson();
+    public final static JsonParser jsonParser = new JsonParser();
 
     public static Type[] getFieldGenericClz(Field field) {
         ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();

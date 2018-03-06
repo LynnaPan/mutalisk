@@ -15,4 +15,8 @@ public @interface ElasticSearchMeta {
     String type() default "data";
 
     String[] id() default {};
+
+    int shards() default 5;
+
+    int replicas() default 2;
 }

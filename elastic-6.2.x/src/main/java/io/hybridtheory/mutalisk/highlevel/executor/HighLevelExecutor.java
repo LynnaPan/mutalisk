@@ -68,16 +68,16 @@ public class HighLevelExecutor implements ElasticExecutor {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
         log.info("Create Index {}:{} for Class {}", schema.index, schema.type, clz.getName());
 
-        return createIndex(schema.index, schema.type, schema.toTypeMapping(), timeout);
+        return createIndex(schema.index, schema.type, schema.toIndexSetting(), schema.toTypeMapping(), timeout);
     }
 
     @Override
-    public boolean createIndex(String index, String type, String mappingSource) {
-        return createIndex(index, type, mappingSource, 0);
+    public boolean createIndex(String index, String type, String settingSource,  String mappingSource) {
+        return createIndex(index, type, settingSource, mappingSource, 0);
     }
 
     @Override
-    public boolean createIndex(String index, String type, String mappingSource, long timeout) {
+    public boolean createIndex(String index, String type, String settingSource,  String mappingSource, long timeout) {
         log.info("Creating Index {}:{}", index, type);
         try {
             CreateIndexRequest request = new CreateIndexRequest(index);

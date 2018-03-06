@@ -1,4 +1,4 @@
-package io.hybridtheory.mutalisk.executor.util;
+package io.hybridtheory.mutalisk.transport.executor.util;
 
 
 import com.google.gson.JsonObject;
@@ -48,7 +48,7 @@ public class RequestHelper {
         }
 
         // need to read id from object
-        JsonObject jobj = (JsonObject) StorageUtil.gson.toJsonTree(object);
+        JsonObject jobj = StorageUtil.gson.toJsonTree(object).getAsJsonObject();
         IndexRequest request = new IndexRequest(schema.index, schema.type, schema.getId(jobj));
         request.source(jobj.toString());
 

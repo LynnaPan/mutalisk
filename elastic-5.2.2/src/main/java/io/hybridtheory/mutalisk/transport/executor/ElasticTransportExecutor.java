@@ -1,4 +1,4 @@
-package io.hybridtheory.mutalisk.executor;
+package io.hybridtheory.mutalisk.transport.executor;
 
 import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
 import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
@@ -7,9 +7,9 @@ import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
-import io.hybridtheory.mutalisk.executor.aggregation.ElasticAggregateParser;
-import io.hybridtheory.mutalisk.executor.filter.ElasticSearchParser;
-import io.hybridtheory.mutalisk.executor.util.RequestHelper;
+import io.hybridtheory.mutalisk.transport.executor.aggregation.ElasticAggregateParser;
+import io.hybridtheory.mutalisk.transport.executor.filter.ElasticSearchParser;
+import io.hybridtheory.mutalisk.transport.executor.util.RequestHelper;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -79,21 +79,23 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
         log.info("Create Index {}:{} for Class {}", schema.index, schema.type, clz.getName());
 
-        return createIndex(schema.index, schema.type, schema.toTypeMapping(), timeout);
+        return createIndex(schema.index, schema.type, schema.toIndexSetting(), schema.toTypeMapping(), timeout);
     }
 
     @Override
-    public boolean createIndex(String index, String type, String mappingSource) {
-        return createIndex(index, type, mappingSource, 0);
+    public boolean createIndex(String index, String type, String settingSource, String mappingSource) {
+        return createIndex(index, type, settingSource, mappingSource, 0);
     }
 
     @Override
-    public boolean createIndex(String index, String type, String mappingSource, long timeout) {
+    public boolean createIndex(String index, String type, String settingSource, String mappingSource, long timeout) {
         log.info("Create Index {}:{}", index, type);
 
         try {
             CreateIndexRequestBuilder builder = this.client.admin().indices()
-                .prepareCreate(index).addMapping(type, mappingSource);
+                .prepareCreate(index)
+                .setSettings(settingSource)
+                .addMapping(type, mappingSource);
 
             CreateIndexResponse response;
             if (timeout != 0) {

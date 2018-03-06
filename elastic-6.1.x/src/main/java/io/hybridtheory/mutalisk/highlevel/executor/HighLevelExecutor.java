@@ -5,14 +5,8 @@ import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
 import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
-import org.apache.http.HttpHost;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +42,12 @@ public class HighLevelExecutor implements ElasticExecutor {
     }
 
     @Override
-    public boolean createIndex(String index, String type, String mappingSource) {
+    public boolean createIndex(String index, String type, String settingSource, String mappingSource) {
         return false;
     }
 
     @Override
-    public boolean createIndex(String index, String type, String mappingSource, long timeout) {
+    public boolean createIndex(String index, String type, String settingSource, String mappingSource, long timeout) {
         log.info("Creating Index {}:{}", index, type);
         return false;
     }

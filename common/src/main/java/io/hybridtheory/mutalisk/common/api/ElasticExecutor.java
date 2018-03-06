@@ -17,9 +17,9 @@ public interface ElasticExecutor extends Closeable{
 
     public boolean createIndex(Class clz, long timeout);
 
-    public boolean createIndex(String index, String type, String mappingSource);
+    public boolean createIndex(String index, String type, String settingSource, String mappingSource);
 
-    public boolean createIndex(String index, String type, String mappingSource, long timeout);
+    public boolean createIndex(String index, String type, String settingSource, String mappingSource, long timeout);
 
     // remove index
     public boolean deleteIndex(Class clz);

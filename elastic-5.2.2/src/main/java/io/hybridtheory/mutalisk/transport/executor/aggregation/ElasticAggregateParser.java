@@ -1,4 +1,4 @@
-package io.hybridtheory.mutalisk.executor.aggregation;
+package io.hybridtheory.mutalisk.transport.executor.aggregation;
 
 
 import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;

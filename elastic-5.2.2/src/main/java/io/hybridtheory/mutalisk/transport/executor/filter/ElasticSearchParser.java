@@ -1,4 +1,4 @@
-package io.hybridtheory.mutalisk.executor.filter;
+package io.hybridtheory.mutalisk.transport.executor.filter;
 
 
 import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;

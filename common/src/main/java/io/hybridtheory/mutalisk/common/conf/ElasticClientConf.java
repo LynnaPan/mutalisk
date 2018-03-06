@@ -2,7 +2,9 @@ package io.hybridtheory.mutalisk.common.conf;
 
 import org.apache.http.HttpHost;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by kevinlynna on 21/01/2018.
@@ -11,28 +13,27 @@ public class ElasticClientConf {
     public String cluster;
     public HttpHost[] hostPorts;
 
+    public Map<String, String> settings;
+
     public ElasticClientConf() {
+        this.settings = new HashMap<>();
     }
 
-    public ElasticClientConf(List<String> hosts) {
-        hostPorts = new HttpHost[hosts.size()];
+    public ElasticClientConf setCluster(String cluster) {
+        this.cluster = cluster;
 
-        for (int i = 0; i < hostPorts.length; i++) {
-            String[] splits = hosts.get(i).split(":");
-            hostPorts[i] = new HttpHost(splits[0], Integer.parseInt(splits[1]));
-        }
+        return this;
     }
 
-    public ElasticClientConf(HttpHost[] hostPorts) {
+    public ElasticClientConf setHostPorts(HttpHost[] hostPorts) {
         this.hostPorts = hostPorts;
+
+        return this;
     }
 
-    public ElasticClientConf(List<String> hosts, String type) {
-        hostPorts = new HttpHost[hosts.size()];
+    public ElasticClientConf putSetting(String key, String value) {
+        this.settings.put(key, value);
 
-        for (int i = 0; i < hostPorts.length; i++) {
-            String[] splits = hosts.get(i).split(":");
-            hostPorts[i] = new HttpHost(splits[0], Integer.parseInt(splits[1]), type);
-        }
+        return this;
     }
 }
