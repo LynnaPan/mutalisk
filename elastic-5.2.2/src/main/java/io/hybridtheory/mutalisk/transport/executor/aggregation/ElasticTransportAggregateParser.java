@@ -8,7 +8,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ElasticAggregateParser {
+public class ElasticTransportAggregateParser {
     public static List<AggregationBuilder> parse(List<ElasticAggregate> aggregates) {
         List<AggregationBuilder> ags = new ArrayList<>();
 

@@ -171,6 +171,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
         return ResponseHepler.response200Check(response);
     }
 
+    //@Use https://www.elastic.co/guide/en/elasticsearch/reference/current/search-count.html
     @Override
     public long countIndex(Class clz) {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);

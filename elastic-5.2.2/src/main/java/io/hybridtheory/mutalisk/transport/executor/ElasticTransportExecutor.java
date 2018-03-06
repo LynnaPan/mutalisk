@@ -8,8 +8,8 @@ import io.hybridtheory.mutalisk.common.api.sort.ElasticSort;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
-import io.hybridtheory.mutalisk.transport.executor.aggregation.ElasticAggregateParser;
-import io.hybridtheory.mutalisk.transport.executor.filter.ElasticSearchParser;
+import io.hybridtheory.mutalisk.transport.executor.aggregation.ElasticTransportAggregateParser;
+import io.hybridtheory.mutalisk.transport.executor.filter.ElasticTransportSearchParser;
 import io.hybridtheory.mutalisk.transport.executor.util.RequestHelper;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
@@ -404,10 +404,9 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        for (QueryBuilder filter : ElasticSearchParser.parse(filters)) {
+        for (QueryBuilder filter : ElasticTransportSearchParser.parse(filters)) {
             sourceBuilder.query(filter);
         }
-
 
         request.source(sourceBuilder);
 
@@ -459,11 +458,11 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        for (QueryBuilder filter : ElasticSearchParser.parse(filters)) {
+        for (QueryBuilder filter : ElasticTransportSearchParser.parse(filters)) {
             sourceBuilder.query(filter);
         }
 
-        for (AggregationBuilder builder : ElasticAggregateParser.parse(aggregates)) {
+        for (AggregationBuilder builder : ElasticTransportAggregateParser.parse(aggregates)) {
             sourceBuilder.aggregation(builder);
         }
 

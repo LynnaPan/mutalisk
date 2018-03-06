@@ -9,7 +9,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ElasticSearchParser {
+public class ElasticTransportSearchParser {
     public static List<QueryBuilder> parse(List<ElasticFilter> filters) {
         List<QueryBuilder> list = new ArrayList<>();
 

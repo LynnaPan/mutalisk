@@ -2,8 +2,9 @@ package io.hybridtheory.mutalisk.common.api.sort;
 
 
 import io.hybridtheory.mutalisk.common.type.ElasticSortOrder;
+import io.hybridtheory.mutalisk.common.type.ElasticSortType;
 
 public interface ElasticSort {
-    ElasticSort type();
+    ElasticSortType type();
     ElasticSortOrder order();
 }
