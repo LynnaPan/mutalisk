@@ -4,6 +4,7 @@ import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
 import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
 import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
+import io.hybridtheory.mutalisk.common.api.sort.ElasticSort;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -209,6 +210,26 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, ElasticSort sort) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, ElasticSort sort) {
         return null;
     }
 

@@ -3,6 +3,7 @@ package io.hybridtheory.mutalisk.common.api;
 import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
 import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
+import io.hybridtheory.mutalisk.common.api.sort.ElasticSort;
 
 import java.io.Closeable;
 import java.util.List;
@@ -90,6 +91,16 @@ public interface ElasticExecutor extends Closeable{
     public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters);
 
     public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters);
+
+    // size = 0 for infinite
+    public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size);
+
+    public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size);
+
+    // 0 for infinite
+    public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, ElasticSort sort);
+
+    public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, ElasticSort sort   );
 
     public <T extends Object> Map<String, Object> aggregate(Class<T[]> arrayClz,
                                                             List<ElasticFilter> filters,
