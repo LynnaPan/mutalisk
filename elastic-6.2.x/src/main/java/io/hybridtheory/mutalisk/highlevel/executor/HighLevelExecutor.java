@@ -7,6 +7,7 @@ import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
 import io.hybridtheory.mutalisk.common.api.sort.ElasticSort;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
+import io.hybridtheory.mutalisk.common.util.StorageUtil;
 import io.hybridtheory.mutalisk.transport.executor.util.RequestHelper;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.DocWriteResponse;
@@ -19,6 +20,8 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -40,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -233,10 +237,12 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public boolean clearIndexType(String index, String type) throws BulkDeleteException {
-        BulkByScrollResponse response =
-                DeleteByQueryAction.INSTANCE.newRequestBuilder((ElasticsearchClient) client)
-                        .source(index)
-                        .get();
+        try {
+            BulkByScrollResponse response =
+                    DeleteByQueryAction.INSTANCE.newRequestBuilder((ElasticsearchClient) client)
+                            .source(index)
+                            .get();
+
 
         long deleted = response.getDeleted();
         log.info("Delete {} items in index.", deleted, index);
@@ -245,27 +251,22 @@ public class HighLevelExecutor implements ElasticExecutor {
         }
 
         return true;
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return false;
     }
 
-    @Override
-    public boolean insertById(Object object, String id) {
-        return insertById(object, id, 0);
-    }
-
-    @Override
-    public boolean insertById(Object object, String id, long timeout) {
+    private boolean insertByRequest(IndexRequest request, long timeout) {
         try {
-            IndexRequest request = RequestHelper.buildIdIndexRequest(object, id);
-            log.info("insert id {} ", id);
-
             if (timeout > 0) {
                 request.timeout(TimeValue.timeValueMillis(timeout));
             }
             IndexResponse indexResponse = client.index(request);
             if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
-                log.info("document {} was created!", id);
+                log.info("Document was created!");
             } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-                log.info("document {} was updated!", id);
+                log.info("Document was updated!");
             }
             ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
             if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
@@ -286,6 +287,19 @@ public class HighLevelExecutor implements ElasticExecutor {
 
 
         return false;
+    }
+
+    @Override
+    public boolean insertById(Object object, String id) {
+        return insertById(object, id, 0);
+    }
+
+    @Override
+    public boolean insertById(Object object, String id, long timeout) {
+            IndexRequest request = RequestHelper.buildIdIndexRequest(object, id);
+            log.info("insert id {} ", id);
+
+            return insertByRequest(request, timeout);
     }
 
     @Override
@@ -296,72 +310,20 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public boolean insertById(Object object, Class clz, String id, long timeout) {
-        try {
             IndexRequest request = RequestHelper.buildIdIndexRequest(clz, object, id);
-            if (timeout > 0) {
-                request.timeout(TimeValue.timeValueMillis(timeout));
-            }
-            IndexResponse indexResponse = client.index(request);
-            if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
-                log.info("document {} was created!", id);
-            } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-                log.info("document {} was updated!", id);
-            }
-            ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
-            if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
-                log.info("Successful shards is less than total shards!");
-            }
-            if (shardInfo.getFailed() > 0) {
-                for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
-                    String reason = failure.reason();
-                    log.info("insert by id is failure: {} ", reason);
-                }
-                return false;
-            }
-            return RequestHelper.assertCreatedOrUpdated(indexResponse.status());
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+            return insertByRequest(request, timeout);
     }
 
     @Override
     public boolean insertByNoId(Object object) {
-
         return insertByNoId(object, 0);
     }
 
     @Override
     public boolean insertByNoId(Object object, long timeout) {
-        try {
             IndexRequest request = RequestHelper.buildNoIdIndexRequest(object);
-            if (timeout > 0) {
-                request.timeout(TimeValue.timeValueMillis(timeout));
-            }
-            IndexResponse indexResponse = client.index(request);
-            if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
-                log.info("document was created!");
-            } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-                log.info("document was updated!");
-            }
-            ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
-            if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
-                log.info("Successful shards is less than total shards!");
-            }
-            if (shardInfo.getFailed() > 0) {
-                for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
-                    String reason = failure.reason();
-                    log.info("insert by no id failure: {} ", reason);
-                }
-                return false;
-            }
-            return RequestHelper.assertCreatedOrUpdated(indexResponse.status());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+            return insertByRequest(request, timeout);
     }
 
     @Override
@@ -371,34 +333,8 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public boolean insertByNoId(Object object, Class clz, long timeout) {
-        try {
             IndexRequest request = RequestHelper.buildNoIdIndexRequest(clz, object);
-            if (timeout > 0) {
-                request.timeout(TimeValue.timeValueMillis(timeout));
-            }
-            IndexResponse indexResponse = client.index(request);
-            if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
-                log.info("document was created!");
-            } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-                log.info("document was updated!");
-            }
-            ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
-            if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
-                log.info("Successful shards is less than total shards!");
-            }
-            if (shardInfo.getFailed() > 0) {
-                for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
-                    String reason = failure.reason();
-                    log.info("insert by no id failure: {} ", reason);
-                }
-                return false;
-            }
-            return RequestHelper.assertCreatedOrUpdated(indexResponse.status());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+            return insertByRequest(request, timeout);
     }
 
     @Override
@@ -409,33 +345,8 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public boolean insert(Object object, long timeout) throws ExecutionException, InterruptedException {
-        try {
             IndexRequest request = RequestHelper.buildIndexRequest(object);
-            if (timeout > 0 ) {
-                request.timeout(TimeValue.timeValueMillis(timeout));
-            }IndexResponse indexResponse = client.index(request);
-            if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
-                log.info("document was created!");
-            } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-                log.info("document was updated!");
-            }
-            ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
-            if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
-                log.info("Successful shards is less than total shards!");
-            }
-            if (shardInfo.getFailed() > 0) {
-                for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
-                    String reason = failure.reason();
-                    log.info("insert by no id failure: {} ", reason);
-                }
-                return false;
-            }
-            return RequestHelper.assertCreatedOrUpdated(indexResponse.status());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+            return insertByRequest(request, timeout);
     }
 
     @Override
@@ -445,34 +356,8 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public boolean insert(Object object, Class clz, long timeout) throws ExecutionException, InterruptedException {
-        try {
             IndexRequest request = RequestHelper.buildIndexRequest(clz, object);
-            if (timeout > 0) {
-                request.timeout(TimeValue.timeValueMillis(timeout));
-            }
-            IndexResponse indexResponse = client.index(request);
-            if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
-                log.info("document was created!");
-            } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-                log.info("document was updated!");
-            }
-            ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
-            if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
-                log.info("Successful shards is less than total shards!");
-            }
-            if (shardInfo.getFailed() > 0) {
-                for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
-                    String reason = failure.reason();
-                    log.info("insert by no id failure: {} ", reason);
-                }
-                return false;
-            }
-            return RequestHelper.assertCreatedOrUpdated(indexResponse.status());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+            return insertByRequest(request, timeout);
     }
 
     @Override
@@ -493,31 +378,82 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public <T> T get(Class<T> clz, String id) {
+        try{
+            ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+            GetRequest request = new GetRequest(schema.index, schema.type, id);
+            GetResponse getResponse = client.get(request);
+            if (getResponse.isExists()) {
+                String sourceAsString = getResponse.getSourceAsString();
+                return StorageUtil.gson.fromJson(sourceAsString, clz);
+            } else {
+                log.info("Response does not exist.");
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
     public <T> boolean bulkInsert(T[] objects, Class<T> clz) throws ExecutionException, InterruptedException {
-        return false;
+        return bulkInsert(Arrays.asList(objects),clz);
     }
 
     @Override
     public <T> boolean bulkInsert(List<T> objects, Class<T> clz) throws ExecutionException, InterruptedException {
+        BulkRequest bulkRequest = new BulkRequest();
+
+        for(Object object:objects) {
+            bulkRequest.add(RequestHelper.buildIndexRequest(clz,object));
+        }
+        try {
+            BulkResponse responses = client.bulk(bulkRequest);
+            if(responses.hasFailures()){
+                throw new ExecutionException(new Exception(responses.buildFailureMessage()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 
     @Override
     public <T> boolean bulkInsert(T[] objects) throws ExecutionException, InterruptedException {
-        return false;
+        return bulkInsert(Arrays.asList(objects));
     }
 
     @Override
     public <T> boolean bulkInsert(List<T> objects) throws ExecutionException, InterruptedException {
+        BulkRequest bulkRequest = new BulkRequest();
+
+        for(Object object:objects) {
+            bulkRequest.add(RequestHelper.buildIndexRequest(object));
+        }
+        try {
+            BulkResponse responses = client.bulk(bulkRequest);
+            if(responses.hasFailures()){
+                throw new ExecutionException(new Exception(responses.buildFailureMessage()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters) {
+        Class clz = arrayClz.getComponentType();
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        SearchRequest request = new SearchRequest(schema.index);
+        request.types(schema.type);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+
         return null;
     }
 

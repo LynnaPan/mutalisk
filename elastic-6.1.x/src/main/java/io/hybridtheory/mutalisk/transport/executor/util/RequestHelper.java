@@ -15,14 +15,11 @@ public class RequestHelper {
 
     public static IndexRequest buildNoIdIndexRequest(Object object) {
         Class clz = object.getClass();
-        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
-
-        return new IndexRequest(schema.index, schema.type).source(StorageUtil.gson.toJson(object));
+        return buildNoIdIndexRequest(clz, object);
     }
 
     public static IndexRequest buildNoIdIndexRequest(Class clz, Object object) {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
-
         return new IndexRequest(schema.index, schema.type).source(StorageUtil.gson.toJson(object));
     }
 
