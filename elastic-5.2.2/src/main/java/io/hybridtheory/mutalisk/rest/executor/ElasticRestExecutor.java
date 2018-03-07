@@ -171,15 +171,15 @@ public class ElasticRestExecutor implements ElasticExecutor {
     public long countIndex(String index, String type) {
         Response response = null;
         try {
-            response = this.client.performRequest("GET", "/" + index + "/" + type + "?size=0");
+            response = this.client.performRequest("GET", "/" + index + "/" + type + "/_count");
         } catch (IOException e) {
             log.error("Unable to check count index : {}", index, e);
             return -1;
         }
 
-        if (ResponseHelper.response200Check(response)) return -1;
+        if (!ResponseHelper.response200Check(response)) return -1;
 
-        return ResponseHelper.searchHitsFetch(response);
+        return ResponseHelper.getCountValue(response);
     }
 
     @Override
@@ -192,7 +192,8 @@ public class ElasticRestExecutor implements ElasticExecutor {
     public boolean clearIndexType(String index, String type) throws BulkDeleteException {
         Response response = null;
         try {
-            response = this.client.performRequest("POST", index + "/_delete_by_query");
+            response = this.client.performRequest("POST", "/" + index + "/_delete_by_query", Collections.EMPTY_MAP,
+                new NStringEntity("{}"));
         } catch (IOException e) {
             log.error("Unable to check clear index : {}", index, e);
             return false;
@@ -223,7 +224,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
 
         try {
             Response response = this.client.performRequest("PUT", schema.index + "/" + schema.type + "/" + id,
-                null, new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
+                Collections.EMPTY_MAP, new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
             return ResponseHelper.documentCreatedCheck(response);
         } catch (IOException e) {
             log.error("Unable to insert into index : {} - {} id = {}", schema.index, schema.type, id, e);

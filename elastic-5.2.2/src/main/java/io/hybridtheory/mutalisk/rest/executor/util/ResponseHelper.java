@@ -50,6 +50,18 @@ public class ResponseHelper {
         return res.get("timed_out").getAsBoolean();
     }
 
+    public static int getCountValue(Response response) {
+        JsonObject res = null;
+        try {
+            res = getJson(response);
+        } catch (IOException e) {
+            log.error("Unable to parse response or format error", e);
+            return -1;
+        }
+
+        return res.get("count").getAsInt();
+    }
+
     public static int searchHitsFetch(Response response) {
         JsonObject res = null;
         try {
