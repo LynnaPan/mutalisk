@@ -190,7 +190,7 @@ public class ElasticSearchSchema {
     }
 
     public String toIndexCreate() {
-        return toIndexSettingJson().toString();
+        return toIndexCreateJson().toString();
     }
 
     public JsonObject toIndexSettingJson() {

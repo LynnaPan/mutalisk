@@ -58,7 +58,10 @@ public class ElasticTransportExecutor implements ElasticExecutor {
     private TransportClient client;
 
     public ElasticTransportExecutor(ElasticClientConf conf) {
-        this.client = new PreBuiltTransportClient(Settings.EMPTY);
+        Settings settings = Settings.builder()
+            .put("cluster.name", conf.cluster).build();
+
+        this.client = new PreBuiltTransportClient(settings);
 
         for (HttpHost httpHost : conf.hostPorts) {
             try {
@@ -66,7 +69,7 @@ public class ElasticTransportExecutor implements ElasticExecutor {
                     new InetSocketTransportAddress(
                         InetAddress.getByName(httpHost.getHostName()), httpHost.getPort()));
             } catch (Throwable t) {
-                t.printStackTrace();
+                log.error("Unable to build up client", t);
             }
         }
     }
@@ -435,8 +438,8 @@ public class ElasticTransportExecutor implements ElasticExecutor {
         }
 
         if (sorts != null && sorts.size() > 0) {
-            for (SortBuilder builder: ElasticTransportSortParser.parse(sorts))
-            sourceBuilder.sort(builder);
+            for (SortBuilder builder : ElasticTransportSortParser.parse(sorts))
+                sourceBuilder.sort(builder);
         }
 
         request.source(sourceBuilder);

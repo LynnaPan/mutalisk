@@ -19,6 +19,12 @@ public class ElasticClientConf {
         this.settings = new HashMap<>();
     }
 
+    public ElasticClientConf(String cluster, HttpHost[] hostPorts) {
+        this.cluster = cluster;
+        this.hostPorts = hostPorts;
+        this.settings = new HashMap<>();
+    }
+
     public ElasticClientConf setCluster(String cluster) {
         this.cluster = cluster;
 

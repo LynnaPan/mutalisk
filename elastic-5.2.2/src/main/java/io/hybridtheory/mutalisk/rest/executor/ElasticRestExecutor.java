@@ -25,10 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class ElasticRestExecutor implements ElasticExecutor {
@@ -48,18 +45,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
     @Override
     public boolean createIndex(Class clz, long timeout) {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
-
-        Response response = null;
-        try {
-            response = this.client.performRequest("PUT", "/" + schema.index + "/" + schema.type, null, new NStringEntity(
-                schema.toIndexCreate(), ContentType.APPLICATION_JSON));
-        } catch (IOException e) {
-            log.error("Unable to performance index create request : {} - {}", schema.index, schema.type, e);
-
-            return false;
-        }
-
-        return ResponseHelper.responseAckCheck(response);
+        return createIndex(schema.index, schema.type, schema.toIndexSetting(), schema.toTypeMapping());
     }
 
     @Override
@@ -70,15 +56,15 @@ public class ElasticRestExecutor implements ElasticExecutor {
     @Override
     public boolean createIndex(String index, String type, String settingSource, String mappingSource, long timeout) {
         Response response = null;
+
         try {
-            response = this.client.performRequest("PUT", "/" + index + "/" + type, null, new NStringEntity(
+            response = this.client.performRequest("PUT", "/" + index, Collections.emptyMap(), new NStringEntity(
                 "{" +
-                    "settings : " + settingSource + "," +
-                    "properties : " + mappingSource +
+                    "\"settings\" : " + settingSource + "," +
+                    "\"mappings\" : " + mappingSource +
                     "}", ContentType.APPLICATION_JSON));
         } catch (IOException e) {
             log.error("Unable to performance index create request : {} - {}", index, type, e);
-
             return false;
         }
 
@@ -267,7 +253,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
 
         try {
             Response response = this.client.performRequest("PUT", schema.index + "/" + schema.type,
-                null, new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
+                Collections.emptyMap(), new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
             return ResponseHelper.documentCreatedCheck(response);
         } catch (IOException e) {
             log.error("Unable to insert into index : {} - {}", schema.index, schema.type, e);
@@ -304,7 +290,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
 
         try {
             Response response = this.client.performRequest("PUT", schema.index + "/" + schema.type + "/" + id,
-                null, new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
+                Collections.emptyMap(), new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
             return ResponseHelper.documentCreatedCheck(response);
         } catch (IOException e) {
             log.error("Unable to insert into index : {} - {} id = {}", schema.index, schema.type, id, e);
@@ -371,7 +357,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
     @Override
     public <T> boolean bulkInsert(List<T> objects) throws ExecutionException, InterruptedException {
         try {
-            Response response = this.client.performRequest("POST", "_bulk", null,
+            Response response = this.client.performRequest("POST", "_bulk", Collections.emptyMap(),
                 new NStringEntity(RequestHelper.buildBulkInsert(objects), ContentType.APPLICATION_JSON));
             return ResponseHelper.bulkInsertCheck(response);
         } catch (IOException e) {
@@ -419,7 +405,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
         }
 
         try {
-            Response response = this.client.performRequest("POST", link, null, new NStringEntity(
+            Response response = this.client.performRequest("POST", link, Collections.emptyMap(), new NStringEntity(
                 searchObj.toString(), ContentType.APPLICATION_JSON
             ));
             JsonObject res = ResponseHelper.getJson(response);
@@ -460,7 +446,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
         searchObj.add("aggs", ElasitcRestAggregateParser.parse(aggregates));
 
         try {
-            Response response = this.client.performRequest("POST", link, null, new NStringEntity(
+            Response response = this.client.performRequest("POST", link, Collections.emptyMap(), new NStringEntity(
                 searchObj.toString(), ContentType.APPLICATION_JSON
             ));
             JsonObject res = ResponseHelper.getJson(response);
