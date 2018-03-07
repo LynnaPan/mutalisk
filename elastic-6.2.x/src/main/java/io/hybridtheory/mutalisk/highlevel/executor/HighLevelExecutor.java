@@ -4,6 +4,7 @@ import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
 import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
 import io.hybridtheory.mutalisk.common.api.filter.ElasticFilter;
+import io.hybridtheory.mutalisk.common.api.sort.ElasticSort;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.transport.executor.util.RequestHelper;
@@ -18,6 +19,8 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -400,11 +403,38 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public boolean insert(Object object) throws ExecutionException, InterruptedException {
-        return false;
+
+        return insert(object, 0);
     }
 
     @Override
     public boolean insert(Object object, long timeout) throws ExecutionException, InterruptedException {
+        try {
+            IndexRequest request = RequestHelper.buildIndexRequest(object);
+            if (timeout > 0 ) {
+                request.timeout(TimeValue.timeValueMillis(timeout));
+            }IndexResponse indexResponse = client.index(request);
+            if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
+                log.info("document was created!");
+            } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
+                log.info("document was updated!");
+            }
+            ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
+            if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
+                log.info("Successful shards is less than total shards!");
+            }
+            if (shardInfo.getFailed() > 0) {
+                for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
+                    String reason = failure.reason();
+                    log.info("insert by no id failure: {} ", reason);
+                }
+                return false;
+            }
+            return RequestHelper.assertCreatedOrUpdated(indexResponse.status());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -415,11 +445,49 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public boolean insert(Object object, Class clz, long timeout) throws ExecutionException, InterruptedException {
+        try {
+            IndexRequest request = RequestHelper.buildIndexRequest(clz, object);
+            if (timeout > 0) {
+                request.timeout(TimeValue.timeValueMillis(timeout));
+            }
+            IndexResponse indexResponse = client.index(request);
+            if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
+                log.info("document was created!");
+            } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
+                log.info("document was updated!");
+            }
+            ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
+            if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
+                log.info("Successful shards is less than total shards!");
+            }
+            if (shardInfo.getFailed() > 0) {
+                for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
+                    String reason = failure.reason();
+                    log.info("insert by no id failure: {} ", reason);
+                }
+                return false;
+            }
+            return RequestHelper.assertCreatedOrUpdated(indexResponse.status());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
     @Override
     public boolean delete(Class clz, String id) {
+        try {
+            ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+            DeleteRequest request = new DeleteRequest(schema.index, schema.type, id);
+            DeleteResponse deleteResponse = client.delete(request);
+            if (deleteResponse.getResult() == DocWriteResponse.Result.NOT_FOUND) {
+                log.info("Delete target does not exist.");
+            }
+            return deleteResponse.getResult() == DocWriteResponse.Result.DELETED;
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
         return false;
     }
 
@@ -455,6 +523,26 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, List<ElasticSort> sorts) {
+        return null;
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, List<ElasticSort> sorts) {
         return null;
     }
 
