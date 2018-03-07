@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public interface ElasticExecutor extends Closeable{
+public interface ElasticExecutor extends Closeable {
 
     // create action
     // https://www.elastic.co/guide/en/elasticsearch/client/java-api/5.2/java-admin-indices.html
@@ -98,9 +98,9 @@ public interface ElasticExecutor extends Closeable{
     public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size);
 
     // 0 for infinite
-    public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, ElasticSort sort);
+    public <T extends Object> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, List<ElasticSort> sorts);
 
-    public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, ElasticSort sort   );
+    public <T extends Object> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, List<ElasticSort> sorts);
 
     public <T extends Object> Map<String, Object> aggregate(Class<T[]> arrayClz,
                                                             List<ElasticFilter> filters,

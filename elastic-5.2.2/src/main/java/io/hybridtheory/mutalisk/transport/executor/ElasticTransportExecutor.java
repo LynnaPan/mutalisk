@@ -10,6 +10,7 @@ import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
 import io.hybridtheory.mutalisk.transport.executor.aggregation.ElasticTransportAggregateParser;
 import io.hybridtheory.mutalisk.transport.executor.filter.ElasticTransportSearchParser;
+import io.hybridtheory.mutalisk.transport.executor.sort.ElasticTransportSortParser;
 import io.hybridtheory.mutalisk.transport.executor.util.RequestHelper;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
@@ -38,6 +39,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregation;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -396,6 +398,26 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters) {
+        return search(arrayClz, filters, 0, null);
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters) {
+        return search(arrayClz, Arrays.asList(filters));
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size) {
+        return search(arrayClz, filters, size, null);
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size) {
+        return search(arrayClz, Arrays.asList(filters), size);
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, List<ElasticSort> sorts) {
         Class clz = arrayClz.getComponentType();
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
@@ -406,6 +428,15 @@ public class ElasticTransportExecutor implements ElasticExecutor {
 
         for (QueryBuilder filter : ElasticTransportSearchParser.parse(filters)) {
             sourceBuilder.query(filter);
+        }
+
+        if (size != 0) {
+            sourceBuilder.size(size);
+        }
+
+        if (sorts != null && sorts.size() > 0) {
+            for (SortBuilder builder: ElasticTransportSortParser.parse(sorts))
+            sourceBuilder.sort(builder);
         }
 
         request.source(sourceBuilder);
@@ -422,28 +453,8 @@ public class ElasticTransportExecutor implements ElasticExecutor {
     }
 
     @Override
-    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters) {
-        return search(arrayClz, Arrays.asList(filters));
-    }
-
-    @Override
-    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size) {
-        return null;
-    }
-
-    @Override
-    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size) {
-        return null;
-    }
-
-    @Override
-    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, ElasticSort sort) {
-        return null;
-    }
-
-    @Override
-    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, ElasticSort sort) {
-        return null;
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, List<ElasticSort> sorts) {
+        return search(arrayClz, Arrays.asList(filters), size, sorts);
     }
 
     @Override

@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class ResponseHepler {
+public class ResponseHelper {
 
-    private final static Logger log = LoggerFactory.getLogger(ResponseHepler.class);
+    private final static Logger log = LoggerFactory.getLogger(ResponseHelper.class);
 
     public static JsonObject getJson(Response response) throws IOException {
         return StorageUtil.jsonParser.parse(new InputStreamReader(response.getEntity().getContent())).getAsJsonObject();
@@ -47,7 +47,7 @@ public class ResponseHepler {
             return false;
         }
 
-        return res.get("timeed_out").getAsBoolean();
+        return res.get("timed_out").getAsBoolean();
     }
 
     public static int searchHitsFetch(Response response) {

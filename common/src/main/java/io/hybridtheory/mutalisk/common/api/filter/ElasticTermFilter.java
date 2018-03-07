@@ -24,4 +24,28 @@ public class ElasticTermFilter implements ElasticFilter {
     public Object getValue() {
         return value;
     }
+
+    public boolean isNumber() {
+        return value instanceof Number;
+    }
+
+    public boolean isBoolean() {
+        return value instanceof Boolean;
+    }
+
+    public boolean isString() {
+        return value instanceof String;
+    }
+
+    public Number getNumberValue() {
+        return (Number) value;
+    }
+
+    public Boolean getBooleanValue() {
+        return (Boolean) value;
+    }
+
+    public String getStringValue() {
+        return (String) value;
+    }
 }

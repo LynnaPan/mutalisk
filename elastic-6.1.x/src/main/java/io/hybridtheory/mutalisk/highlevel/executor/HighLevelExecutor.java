@@ -224,12 +224,12 @@ public class HighLevelExecutor implements ElasticExecutor {
     }
 
     @Override
-    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, ElasticSort sort) {
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, List<ElasticSort> sort) {
         return null;
     }
 
     @Override
-    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, ElasticSort sort) {
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, List<ElasticSort> sort) {
         return null;
     }
 

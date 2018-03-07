@@ -1,9 +1,9 @@
 package io.hybridtheory.mutalisk.rest.executor;
 
 
-import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.hybridtheory.mutalisk.common.api.ElasticExecutor;
 import io.hybridtheory.mutalisk.common.api.aggregate.ElasticAggregate;
 import io.hybridtheory.mutalisk.common.api.exception.BulkDeleteException;
@@ -12,8 +12,11 @@ import io.hybridtheory.mutalisk.common.api.sort.ElasticSort;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
+import io.hybridtheory.mutalisk.rest.executor.aggregation.ElasitcRestAggregateParser;
+import io.hybridtheory.mutalisk.rest.executor.filter.ElasticRestSearchParser;
+import io.hybridtheory.mutalisk.rest.executor.sort.ElasticRestSortParser;
 import io.hybridtheory.mutalisk.rest.executor.util.RequestHelper;
-import io.hybridtheory.mutalisk.rest.executor.util.ResponseHepler;
+import io.hybridtheory.mutalisk.rest.executor.util.ResponseHelper;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.client.Response;
@@ -22,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -56,7 +59,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
             return false;
         }
 
-        return ResponseHepler.responseAckCheck(response);
+        return ResponseHelper.responseAckCheck(response);
     }
 
     @Override
@@ -72,14 +75,14 @@ public class ElasticRestExecutor implements ElasticExecutor {
                 "{" +
                     "settings : " + settingSource + "," +
                     "properties : " + mappingSource +
-                "}", ContentType.APPLICATION_JSON));
+                    "}", ContentType.APPLICATION_JSON));
         } catch (IOException e) {
             log.error("Unable to performance index create request : {} - {}", index, type, e);
 
             return false;
         }
 
-        return ResponseHepler.responseAckCheck(response);
+        return ResponseHelper.responseAckCheck(response);
     }
 
 
@@ -102,7 +105,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
             return false;
         }
 
-        return ResponseHepler.responseAckCheck(response);
+        return ResponseHelper.responseAckCheck(response);
     }
 
     @Override
@@ -115,7 +118,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
             return false;
         }
 
-        return ResponseHepler.responseAckCheck(response);
+        return ResponseHelper.responseAckCheck(response);
     }
 
     @Override
@@ -137,7 +140,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
             return false;
         }
 
-        return ResponseHepler.responseAckCheck(response);
+        return ResponseHelper.responseAckCheck(response);
     }
 
     @Override
@@ -168,7 +171,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
             return false;
         }
 
-        return ResponseHepler.response200Check(response);
+        return ResponseHelper.response200Check(response);
     }
 
     //@Use https://www.elastic.co/guide/en/elasticsearch/reference/current/search-count.html
@@ -188,9 +191,9 @@ public class ElasticRestExecutor implements ElasticExecutor {
             return -1;
         }
 
-        if (ResponseHepler.response200Check(response)) return -1;
+        if (ResponseHelper.response200Check(response)) return -1;
 
-        return ResponseHepler.searchHitsFetch(response);
+        return ResponseHelper.searchHitsFetch(response);
     }
 
     @Override
@@ -209,7 +212,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
             return false;
         }
 
-        return ResponseHepler.response200Check(response) && ResponseHepler.responseTimeoutCheck(response);
+        return ResponseHelper.response200Check(response) && ResponseHelper.responseTimeoutCheck(response);
     }
 
     @Override
@@ -233,9 +236,9 @@ public class ElasticRestExecutor implements ElasticExecutor {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
         try {
-            Response response  = this.client.performRequest("PUT", schema.index + "/" + schema.type + "/" + id,
+            Response response = this.client.performRequest("PUT", schema.index + "/" + schema.type + "/" + id,
                 null, new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
-            return ResponseHepler.documentCreatedCheck(response);
+            return ResponseHelper.documentCreatedCheck(response);
         } catch (IOException e) {
             log.error("Unable to insert into index : {} - {} id = {}", schema.index, schema.type, id, e);
             return false;
@@ -263,9 +266,9 @@ public class ElasticRestExecutor implements ElasticExecutor {
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
         try {
-            Response response  = this.client.performRequest("PUT", schema.index + "/" + schema.type,
+            Response response = this.client.performRequest("PUT", schema.index + "/" + schema.type,
                 null, new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
-            return ResponseHepler.documentCreatedCheck(response);
+            return ResponseHelper.documentCreatedCheck(response);
         } catch (IOException e) {
             log.error("Unable to insert into index : {} - {}", schema.index, schema.type, e);
             return false;
@@ -300,9 +303,9 @@ public class ElasticRestExecutor implements ElasticExecutor {
         String id = schema.getId(jobj);
 
         try {
-            Response response  = this.client.performRequest("PUT", schema.index + "/" + schema.type + "/" + id,
+            Response response = this.client.performRequest("PUT", schema.index + "/" + schema.type + "/" + id,
                 null, new NStringEntity(StorageUtil.gson.toJson(object), ContentType.APPLICATION_JSON));
-            return ResponseHepler.documentCreatedCheck(response);
+            return ResponseHelper.documentCreatedCheck(response);
         } catch (IOException e) {
             log.error("Unable to insert into index : {} - {} id = {}", schema.index, schema.type, id, e);
             return false;
@@ -315,7 +318,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
 
         try {
             Response response = this.client.performRequest("DELETE", "/" + schema.index + "/" + schema.type + "/" + id);
-            return ResponseHepler.documentDeletedCheck(response);
+            return ResponseHelper.documentDeletedCheck(response);
         } catch (IOException e) {
             log.error("Unable to delete index : {} - {} id = {}", schema.index, schema.type, id, e);
             return false;
@@ -328,7 +331,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
 
         try {
             Response response = this.client.performRequest("GET", "/" + schema.index + "/" + schema.type + "/" + id);
-            JsonObject res = StorageUtil.jsonParser.parse(new InputStreamReader(response.getEntity().getContent())).getAsJsonObject();
+            JsonObject res = ResponseHelper.getJson(response);
 
             if (!res.get("found").getAsBoolean()) {
                 return null;
@@ -338,7 +341,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
 
             return StorageUtil.gson.fromJson(data, clz);
         } catch (IOException e) {
-            log.error("Unable to delete index : {} - {} id = {}", schema.index, schema.type, id, e);
+            log.error("Unable to get index : {} - {} id = {}", schema.index, schema.type, id, e);
             return null;
         }
     }
@@ -353,7 +356,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
         try {
             Response response = this.client.performRequest("POST", "_bulk", null,
                 new NStringEntity(RequestHelper.buildBulkInsert(objects, clz), ContentType.APPLICATION_JSON));
-            return ResponseHepler.bulkInsertCheck(response);
+            return ResponseHelper.bulkInsertCheck(response);
         } catch (IOException e) {
             log.error("Unable to bulk insert", e);
             return false;
@@ -370,7 +373,7 @@ public class ElasticRestExecutor implements ElasticExecutor {
         try {
             Response response = this.client.performRequest("POST", "_bulk", null,
                 new NStringEntity(RequestHelper.buildBulkInsert(objects), ContentType.APPLICATION_JSON));
-            return ResponseHepler.bulkInsertCheck(response);
+            return ResponseHelper.bulkInsertCheck(response);
         } catch (IOException e) {
             log.error("Unable to bulk insert", e);
             return false;
@@ -379,41 +382,111 @@ public class ElasticRestExecutor implements ElasticExecutor {
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters) {
-        return null;
+        return search(arrayClz, filters, 0, null);
     }
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters) {
-        return null;
+        return search(arrayClz, Arrays.asList(filters));
     }
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size) {
-        return null;
+        return search(arrayClz, filters, size, null);
     }
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size) {
-        return null;
+        return search(arrayClz, Arrays.asList(filters), size);
     }
 
     @Override
-    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, ElasticSort sort) {
-        return null;
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, List<ElasticSort> sorts) {
+        Class clz = arrayClz.getComponentType();
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        String link = "/" + schema.index + "/_search?size=0";
+
+        if (size > 0) {
+            link += "?size=" + size;
+        }
+
+        JsonObject searchObj = new JsonObject();
+        searchObj.add("query", ElasticRestSearchParser.parse(filters));
+
+        if (sorts != null && sorts.size() > 0) {
+            searchObj.add("sort", ElasticRestSortParser.parse(sorts));
+        }
+
+        try {
+            Response response = this.client.performRequest("POST", link, null, new NStringEntity(
+                searchObj.toString(), ContentType.APPLICATION_JSON
+            ));
+            JsonObject res = ResponseHelper.getJson(response);
+
+            if (res.get("timed_out").getAsBoolean()) {
+                return null;
+            }
+
+            JsonArray hits = res.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
+
+            Object[] results = new Object[hits.size()];
+
+            for (int i = 0; i < results.length; i++) {
+                results[i] = StorageUtil.gson.fromJson(hits.get(i), clz);
+            }
+
+            return Arrays.copyOf(results, results.length, arrayClz);
+        } catch (IOException e) {
+            log.error("Unable to search index : {} - {}", schema.index, schema.type, e);
+            return null;
+        }
     }
 
     @Override
-    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, ElasticSort sort) {
-        return null;
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, List<ElasticSort> sorts) {
+        return search(arrayClz, Arrays.asList(filters), size, sorts);
     }
 
     @Override
     public <T> Map<String, Object> aggregate(Class<T[]> arrayClz, List<ElasticFilter> filters, List<ElasticAggregate> aggregates) {
-        return null;
+        Class clz = arrayClz.getComponentType();
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        String link = "/" + schema.index + "/_search";
+
+        JsonObject searchObj = new JsonObject();
+        searchObj.add("query", ElasticRestSearchParser.parse(filters));
+        searchObj.add("aggs", ElasitcRestAggregateParser.parse(aggregates));
+
+        try {
+            Response response = this.client.performRequest("POST", link, null, new NStringEntity(
+                searchObj.toString(), ContentType.APPLICATION_JSON
+            ));
+            JsonObject res = ResponseHelper.getJson(response);
+
+            if (res.get("timed_out").getAsBoolean()) {
+                return null;
+            }
+
+            JsonObject aggregations = res.get("aggregations").getAsJsonObject();
+
+            Map<String, Object> results = new HashMap<>();
+
+            for (Map.Entry<String, JsonElement> entry : aggregations.entrySet()) {
+                double value = entry.getValue().getAsJsonObject().get("value").getAsNumber().doubleValue();
+                results.put(entry.getKey(), value);
+            }
+
+            return results;
+        } catch (IOException e) {
+            log.error("Unable to search index : {} - {}", schema.index, schema.type, e);
+            return null;
+        }
     }
 
     @Override
     public void close() throws IOException {
-
+        this.client.close();
     }
 }
