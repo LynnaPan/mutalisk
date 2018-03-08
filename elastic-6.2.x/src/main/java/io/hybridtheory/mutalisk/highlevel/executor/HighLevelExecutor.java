@@ -8,6 +8,9 @@ import io.hybridtheory.mutalisk.common.api.sort.ElasticSort;
 import io.hybridtheory.mutalisk.common.conf.ElasticClientConf;
 import io.hybridtheory.mutalisk.common.schema.ElasticSearchSchema;
 import io.hybridtheory.mutalisk.common.util.StorageUtil;
+import io.hybridtheory.mutalisk.highlevel.executor.aggregation.ElasticAggregateParser;
+import io.hybridtheory.mutalisk.highlevel.executor.sort.ElasticSortParser;
+import io.hybridtheory.mutalisk.transport.executor.filter.ElasticSearchParser;
 import io.hybridtheory.mutalisk.transport.executor.util.RequestHelper;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.DocWriteResponse;
@@ -34,16 +37,25 @@ import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.*;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.metrics.NumericMetricsAggregation;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -445,6 +457,26 @@ public class HighLevelExecutor implements ElasticExecutor {
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters) {
+        return search(arrayClz, filters, 0);
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters) {
+        return search(arrayClz, Arrays.asList(filters));
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size) {
+        return search(arrayClz, filters,size,null);
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size) {
+        return search(arrayClz, Arrays.asList(filters),size, null);
+    }
+
+    @Override
+    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, List<ElasticSort> sorts) {
         Class clz = arrayClz.getComponentType();
         ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
 
@@ -452,39 +484,84 @@ public class HighLevelExecutor implements ElasticExecutor {
         request.types(schema.type);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
 
-        return null;
-    }
+        if(sorts != null && sorts.size() > 0){
+        for(SortBuilder builder: ElasticSortParser.parse(sorts)){
+            searchSourceBuilder.sort(builder);
+        }}
 
-    @Override
-    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters) {
-        return null;
-    }
 
-    @Override
-    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size) {
-        return null;
-    }
+        if(size > 0){
+            searchSourceBuilder.size(size);
+        }
 
-    @Override
-    public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size) {
-        return null;
-    }
+        for (QueryBuilder filter: ElasticSearchParser.parse(filters)){
+            searchSourceBuilder.query(filter);
+        }
 
-    @Override
-    public <T> T[] search(Class<T[]> arrayClz, List<ElasticFilter> filters, int size, List<ElasticSort> sorts) {
+        request.source(searchSourceBuilder);
+
+        try {
+            SearchHits hits = client.search(request).getHits();
+            int totalHits = (int)hits.getTotalHits();
+            Object[] results = new Object[totalHits];
+            for(int i = 0; i <totalHits; i++) {
+                results[i] = StorageUtil.gson.fromJson(hits.getAt(i).getSourceAsString(), clz);
+            }
+            return Arrays.copyOf(results, totalHits, arrayClz);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 
     @Override
     public <T> T[] search(Class<T[]> arrayClz, ElasticFilter[] filters, int size, List<ElasticSort> sorts) {
-        return null;
+        return search(arrayClz, Arrays.asList(filters),size,null);
     }
 
     @Override
     public <T> Map<String, Object> aggregate(Class<T[]> arrayClz, List<ElasticFilter> filters, List<ElasticAggregate> aggregates) {
-        return null;
+        Class clz = arrayClz.getComponentType();
+        ElasticSearchSchema schema = ElasticSearchSchema.getOrBuild(clz);
+
+        SearchRequest request = new SearchRequest(schema.index);
+        request.types(schema.type);
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        for (QueryBuilder filter : ElasticSearchParser.parse(filters)) {
+            sourceBuilder.query(filter);
+        }
+
+        for (AggregationBuilder builder : ElasticAggregateParser.parse(aggregates)) {
+            sourceBuilder.aggregation(builder);
+        }
+
+        request.source(sourceBuilder);
+
+        Aggregations aggResults = null;
+        try {
+            aggResults = client.search(request).getAggregations();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, Object> results = new HashMap<>();
+
+        assert aggResults != null;
+        for (Map.Entry<String, Aggregation> entry : aggResults.asMap().entrySet()) {
+            Aggregation agg = entry.getValue();
+
+            if (NumericMetricsAggregation.SingleValue.class.isAssignableFrom(agg.getClass())) {
+                // @TODO could use response.getAggregations().get("text").getProperty("value") to replace
+                // results.put(entry.getKey(), entry.getValue().getProperty("value"));
+                results.put(entry.getKey(), ((NumericMetricsAggregation.SingleValue) agg).value());
+            }
+        }
+
+        return results;
     }
 
     @Override
